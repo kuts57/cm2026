@@ -27,7 +27,7 @@ input:focus{outline:2px solid #2c3e8c !important}
     var box = document.getElementById('error-box');
     if(box){
       box.style.display = 'block';
-      box.textContent = '⚠ Erreur JavaScript :\\n' + (e.message || e.error) + '\\n' + (e.filename ? (e.filename + ':' + e.lineno) : '');
+      box.textContent = '⚠ Erreur JavaScript : ' + (e.message || e.error) + ' — ' + (e.filename ? (e.filename + ':' + e.lineno) : '');
     }
   });
 </script>
@@ -43,7 +43,7 @@ input:focus{outline:2px solid #2c3e8c !important}
       var box = document.getElementById('error-box');
       if(typeof React === 'undefined' || typeof ReactDOM === 'undefined' || typeof Babel === 'undefined'){
         box.style.display = 'block';
-        box.textContent = '⚠ Une librairie n\\'a pas pu se charger (React/ReactDOM/Babel). Vérifiez la connexion internet ou réessayez.';
+        box.textContent = "⚠ Une librairie n'a pas pu se charger (React/ReactDOM/Babel). Vérifiez la connexion internet ou réessayez.";
         document.getElementById('loading').style.display = 'none';
       }
     }, 4000);
