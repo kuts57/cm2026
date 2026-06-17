@@ -27,30 +27,23 @@ input:focus{outline:2px solid #2c3e8c !important}
     var box = document.getElementById('error-box');
     if(box){
       box.style.display = 'block';
-      box.textContent = '⚠ Erreur JavaScript : ' + (e.message || e.error) + ' — ' + (e.filename ? (e.filename + ':' + e.lineno) : '');
+      box.textContent = '⚠ Erreur JavaScript : ' + (e.message || (e.error && e.error.message) || e.error) + ' — ' + (e.filename ? (e.filename + ':' + e.lineno + ':' + e.colno) : '') + (e.error && e.error.stack ? ('\n' + e.error.stack) : '');
+    }
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    var box = document.getElementById('error-box');
+    if(box){
+      box.style.display = 'block';
+      box.textContent = '⚠ Promesse rejetée non gérée : ' + (e.reason && e.reason.message ? e.reason.message : e.reason) + (e.reason && e.reason.stack ? ('\n' + e.reason.stack) : '');
     }
   });
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js" crossorigin="anonymous"></script>
 
-<script>
-  // Vérifie que les librairies se sont bien chargées avant de lancer Babel
-  window.addEventListener('load', function(){
-    setTimeout(function(){
-      var box = document.getElementById('error-box');
-      if(typeof React === 'undefined' || typeof ReactDOM === 'undefined' || typeof Babel === 'undefined'){
-        box.style.display = 'block';
-        box.textContent = "⚠ Une librairie n'a pas pu se charger (React/ReactDOM/Babel). Vérifiez la connexion internet ou réessayez.";
-        document.getElementById('loading').style.display = 'none';
-      }
-    }, 4000);
-  });
-</script>
-
-<script type="text/babel" data-presets="react">
+<script type="text/babel" id="app-source">
 try {
 const {useState,useMemo,useEffect,useRef}=React;
 
