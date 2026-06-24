@@ -2298,6 +2298,304 @@ function BracketTab({
   }, label))));
 }
 
+  // ─── CLASSEMENT 3ES ──────────────────────────────────────────────────────
+function ThirdsTab({
+  scores
+}) {
+  // Récupère le 3e de chaque groupe + ses stats
+  const thirds = Object.keys(GROUPES).map(grp => {
+    const rows = computeStandings(grp, scores);
+    const team = rows[2]; // 3e du groupe
+    return team ? {
+      ...team,
+      grp
+    } : {
+      name: GROUPES[grp][2],
+      grp,
+      pts: 0,
+      j: 0,
+      g: 0,
+      n: 0,
+      p: 0,
+      bp: 0,
+      bc: 0,
+      diff: 0
+    };
+  });
+
+  // Tri selon critères FIFA : pts > diff > bp > (fair-play ignoré ici) 
+  const sorted = [...thirds].sort((a, b) => b.pts - a.pts || b.diff - a.diff || b.bp - a.bp);
+  const GRP_COLORS = {
+    A: "#e74c3c",
+    B: "#e67e22",
+    C: "#f1c40f",
+    D: "#2ecc71",
+    E: "#1abc9c",
+    F: "#3498db",
+    G: "#9b59b6",
+    H: "#e91e8c",
+    I: "#2c3e8c",
+    J: "#00bcd4",
+    K: "#ff5722",
+    L: "#607d8b"
+  };
+  const qualified = sorted.slice(0, 8);
+  const bubble = sorted.slice(8, 9);
+  const eliminated = sorted.slice(9);
+  const statusColor = i => i < 8 ? "#2ecc71" : i === 8 ? "#f1c40f" : "#e74c3c";
+  const statusLabel = i => i < 8 ? "✓ Qualifié" : i === 8 ? "~ Bubble" : "✗ Éliminé";
+  const statusBg = i => i < 8 ? "#0d1f0d" : i === 8 ? "#1f1a00" : "#1f0d0d";
+  const thCss = {
+    padding: "6px 10px",
+    fontSize: 10,
+    fontWeight: 700,
+    color: "#4a6080",
+    textAlign: "center",
+    borderBottom: "1px solid #1e2a3a",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    whiteSpace: "nowrap"
+  };
+  const tdCss = (center = true) => ({
+    padding: "7px 10px",
+    fontSize: 11,
+    textAlign: center ? "center" : "left",
+    borderBottom: "1px solid #0d1424",
+    whiteSpace: "nowrap"
+  });
+  return React.createElement("div", {
+    style: {
+      paddingBottom: 40
+    }
+  },
+  // Titre + légende
+  React.createElement("div", {
+    style: {
+      marginBottom: 16
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 800,
+      color: "#c0b037",
+      letterSpacing: 3,
+      textTransform: "uppercase",
+      marginBottom: 6
+    }
+  }, "🎟 Classement des 12 Troisièmes"), React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "#5a7090",
+      lineHeight: 1.7
+    }
+  }, "Critères FIFA : Points › Diff. buts › Buts pour › Fair-play › Classement FIFA", React.createElement("br", null), React.createElement("span", {
+    style: {
+      color: "#2ecc71",
+      fontWeight: 600
+    }
+  }, "✓ Top 8 qualifiés"), " · ", React.createElement("span", {
+    style: {
+      color: "#f1c40f",
+      fontWeight: 600
+    }
+  }, "~ Bubble"), " · ", React.createElement("span", {
+    style: {
+      color: "#e74c3c",
+      fontWeight: 600
+    }
+  }, "✗ Éliminé"), " · Se met à jour en temps réel")),
+  // Tableau
+  React.createElement("div", {
+    style: {
+      overflowX: "auto"
+    }
+  }, React.createElement("table", {
+    style: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 11,
+      minWidth: 600
+    }
+  },
+  // En-tête
+  React.createElement("thead", null, React.createElement("tr", {
+    style: {
+      background: "#0d1424"
+    }
+  }, React.createElement("th", {
+    style: {
+      ...thCss,
+      textAlign: "left",
+      width: 28
+    }
+  }, "#"), React.createElement("th", {
+    style: {
+      ...thCss,
+      textAlign: "left"
+    }
+  }, "Équipe"), React.createElement("th", {
+    style: thCss
+  }, "Grp"), React.createElement("th", {
+    style: thCss
+  }, "J"), React.createElement("th", {
+    style: thCss
+  }, "G"), React.createElement("th", {
+    style: thCss
+  }, "N"), React.createElement("th", {
+    style: thCss
+  }, "P"), React.createElement("th", {
+    style: thCss
+  }, "BP"), React.createElement("th", {
+    style: thCss
+  }, "BC"), React.createElement("th", {
+    style: thCss
+  }, "Diff"), React.createElement("th", {
+    style: {
+      ...thCss,
+      color: "#c0b037"
+    }
+  }, "Pts"), React.createElement("th", {
+    style: thCss
+  }, "Statut"))),
+  // Corps
+  React.createElement("tbody", null, sorted.map((t, i) => {
+    const grpColor = GRP_COLORS[t.grp] || "#4a6fa5";
+    const isQ = i < 8;
+    const isBubble = i === 8;
+    const rowBg = i === 0 ? "#0d1f0d22" : i < 8 ? i % 2 === 0 ? "#111827" : "#0f1620" : "#110d0d";
+    const sColor = statusColor(i);
+    return React.createElement("tr", {
+      key: t.name + t.grp,
+      style: {
+        background: rowBg,
+        borderLeft: `3px solid ${isQ ? "#2ecc71" : isBubble ? "#f1c40f" : "#e74c3c"}33`
+      }
+    },
+    // Rang
+    React.createElement("td", {
+      style: {
+        ...tdCss(),
+        fontWeight: 800,
+        color: sColor,
+        fontSize: 13
+      }
+    }, i + 1),
+    // Équipe
+    React.createElement("td", {
+      style: {
+        ...tdCss(false),
+        fontWeight: isQ ? 700 : 400,
+        color: isQ ? "#e8eaf0" : "#8a9ab0"
+      }
+    }, t.name),
+    // Groupe badge
+    React.createElement("td", {
+      style: {
+        ...tdCss()
+      }
+    }, React.createElement("span", {
+      style: {
+        display: "inline-block",
+        padding: "1px 7px",
+        borderRadius: 10,
+        background: grpColor + "33",
+        color: grpColor,
+        fontWeight: 800,
+        fontSize: 10,
+        border: `1px solid ${grpColor}55`
+      }
+    }, t.grp)),
+    // Stats
+    React.createElement("td", {
+      style: {
+        ...tdCss(),
+        color: "#8a9ab0"
+      }
+    }, t.j), React.createElement("td", {
+      style: {
+        ...tdCss(),
+        color: "#2ecc71"
+      }
+    }, t.g), React.createElement("td", {
+      style: {
+        ...tdCss(),
+        color: "#8a9ab0"
+      }
+    }, t.n), React.createElement("td", {
+      style: {
+        ...tdCss(),
+        color: "#e74c3c"
+      }
+    }, t.p), React.createElement("td", {
+      style: {
+        ...tdCss(),
+        color: "#7ec8ff"
+      }
+    }, t.bp), React.createElement("td", {
+      style: {
+        ...tdCss(),
+        color: "#ff8080"
+      }
+    }, t.bc),
+    // Diff
+    React.createElement("td", {
+      style: {
+        ...tdCss(),
+        color: t.diff > 0 ? "#2ecc71" : t.diff < 0 ? "#e74c3c" : "#6b7280",
+        fontWeight: 700
+      }
+    }, t.diff > 0 ? `+${t.diff}` : t.diff),
+    // Points
+    React.createElement("td", {
+      style: {
+        ...tdCss(),
+        fontWeight: 900,
+        fontSize: 14,
+        color: isQ ? "#c0b037" : "#6b7280"
+      }
+    }, t.pts),
+    // Statut
+    React.createElement("td", {
+      style: {
+        ...tdCss()
+      }
+    }, React.createElement("span", {
+      style: {
+        display: "inline-block",
+        padding: "2px 8px",
+        borderRadius: 10,
+        background: statusBg(i),
+        color: sColor,
+        fontWeight: 700,
+        fontSize: 9,
+        border: `1px solid ${sColor}44`
+      }
+    }, statusLabel(i))));
+  })))),
+  // Ligne de coupure
+  React.createElement("div", {
+    style: {
+      marginTop: 16,
+      padding: "10px 14px",
+      background: "#0d1424",
+      borderRadius: 8,
+      border: "1px solid #1e2a3a",
+      fontSize: 11,
+      color: "#5a7090"
+    }
+  }, React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      color: "#f1c40f"
+    }
+  }, "Note : "), "Le fair-play (cartons) et le classement FIFA ne sont pas disponibles dans cette appli — ils interviennent uniquement en cas d'égalité parfaite après pts/diff/BP. En pratique, la coupure ci-dessus est fiable à 99%.", React.createElement("br", null), React.createElement("span", {
+    style: {
+      color: "#3a4a5a",
+      fontSize: 10
+    }
+  }, "Les équipes ayant joué 0 match sont classées ex-aequo en bas. Le classement se met à jour à chaque score saisi.")));
+}
+
   function AgendaTab({
     scores,
     allBracket
@@ -2810,6 +3108,9 @@ function BracketTab({
       style: tabSt("bracket"),
       onClick: () => setTab("bracket")
     }, "🗂 Bracket"), /*#__PURE__*/React.createElement("button", {
+      style: tabSt("thirds"),
+      onClick: () => setTab("thirds")
+    }, "🎟 Meilleurs 3es"), /*#__PURE__*/React.createElement("button", {
       onClick: resetAll,
       style: {
         marginLeft: "auto",
@@ -3118,7 +3419,9 @@ function BracketTab({
           highlight: !!(eqs.eq1 && eqs.eq2)
         });
       }));
-    })), tab === "bracket" && /*#__PURE__*/React.createElement(BracketTab, {
+    })), tab === "thirds" && /*#__PURE__*/React.createElement(ThirdsTab, {
+      scores: scores
+    }), tab === "bracket" && /*#__PURE__*/React.createElement(BracketTab, {
       allBracket: allBracket,
       scores: scores
     }), tab === "agenda" && /*#__PURE__*/React.createElement(AgendaTab, {
