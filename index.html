@@ -1679,6 +1679,625 @@ try {
   }
 
   // ─── COMPOSANT AGENDA ────────────────────────────────────────────────────────
+  // ─── COMPOSANT BRACKET ─────────────────────────────────────────────────────
+// ─── COMPOSANT BRACKET VISUEL ─────────────────────────────────────────────────
+function BracketTab({
+  allBracket,
+  scores
+}) {
+  // Structure du bracket : côté GAUCHE (R32-1..8 → R16-1..4 → SF-1 → FIN)
+  //                        côté DROIT  (R32-9..16 → R16-5..8 → SF-2 → FIN)
+  const R32_LABELS = {
+    "R32-1": ["2e Gr.A", "2e Gr.B"],
+    "R32-2": ["1er Gr.C", "2e Gr.F"],
+    "R32-3": ["1er Gr.E", "Meill. 3e"],
+    "R32-4": ["1er Gr.F", "2e Gr.C"],
+    "R32-5": ["2e Gr.E", "2e Gr.I"],
+    "R32-6": ["1er Gr.I", "Meill. 3e"],
+    "R32-7": ["1er Gr.A", "Meill. 3e"],
+    "R32-8": ["1er Gr.L", "Meill. 3e"],
+    "R32-9": ["1er Gr.G", "Meill. 3e"],
+    "R32-10": ["1er Gr.D", "Meill. 3e"],
+    "R32-11": ["1er Gr.H", "2e Gr.J"],
+    "R32-12": ["2e Gr.K", "2e Gr.L"],
+    "R32-13": ["1er Gr.B", "Meill. 3e"],
+    "R32-14": ["2e Gr.D", "2e Gr.G"],
+    "R32-15": ["1er Gr.J", "2e Gr.H"],
+    "R32-16": ["1er Gr.K", "Meill. 3e"]
+  };
+  const getTeam = (id, side) => {
+    const eqs = allBracket[id] || {};
+    const team = side === 1 ? eqs.eq1 : eqs.eq2;
+    if (team) return team;
+    const lbs = R32_LABELS[id];
+    if (lbs) return side === 1 ? lbs[0] : lbs[1];
+    return "À déterm.";
+  };
+  const getScore = id => {
+    const s = scores[id] || {
+      g1: "",
+      g2: ""
+    };
+    return {
+      g1: s.g1,
+      g2: s.g2,
+      done: s.g1 !== "" && s.g2 !== ""
+    };
+  };
+  const isWinner = (id, side) => {
+    const s = scores[id] || {};
+    const g1 = parseInt(s.g1, 10),
+      g2 = parseInt(s.g2, 10);
+    if (isNaN(g1) || isNaN(g2)) return false;
+    return side === 1 ? g1 > g2 : g2 > g1;
+  };
+
+  // Dimensions
+  const CARD_W = 148,
+    CARD_H = 28,
+    GAP_V = 8,
+    ROW_H = CARD_H + GAP_V;
+  const COL_W = 168,
+    HALF_GAP = 20;
+
+  // LEFT side ids par round
+  const LEFT = {
+    r32: ["R32-1", "R32-2", "R32-3", "R32-4", "R32-5", "R32-6", "R32-7", "R32-8"],
+    r16: ["R16-1", "R16-2", "R16-3", "R16-4"],
+    qf: ["QF-1", "QF-2"],
+    sf: ["SF-1"]
+  };
+  const RIGHT = {
+    r32: ["R32-9", "R32-10", "R32-11", "R32-12", "R32-13", "R32-14", "R32-15", "R32-16"],
+    r16: ["R16-5", "R16-6", "R16-7", "R16-8"],
+    qf: ["QF-3", "QF-4"],
+    sf: ["SF-2"]
+  };
+
+  // Couleurs par tour
+  const COL = {
+    r32: "#3a7bd5",
+    r16: "#8e44ad",
+    qf: "#c0392b",
+    sf: "#d35400",
+    fin: "#c0b037",
+    p3: "#27ae60"
+  };
+
+  // Calcul positions Y pour chaque round (centrées sur la hauteur totale)
+  // 8 matchs par côté en R32, chaque match = 2 cartes + espace
+  const MATCH_H = 2 * CARD_H + GAP_V + 14; // 2 équipes + gap + connecteur
+  const BLOCK_GAP = 16;
+  const TOTAL_H = 8 * MATCH_H + 7 * BLOCK_GAP;
+
+  // Position Y du centre de chaque match pour chaque round
+  const yR32 = i => i * (MATCH_H + BLOCK_GAP) + MATCH_H / 2;
+  const yR16 = i => {
+    const a = yR32(i * 2),
+      b = yR32(i * 2 + 1);
+    return (a + b) / 2;
+  };
+  const yQF = i => {
+    const a = yR16(i * 2),
+      b = yR16(i * 2 + 1);
+    return (a + b) / 2;
+  };
+  const ySF = () => {
+    const a = yQF(0),
+      b = yQF(1);
+    return (a + b) / 2;
+  };
+  const yFIN = TOTAL_H / 2;
+
+  // Colonnes X
+  const xL_r32 = 0;
+  const xL_r16 = xL_r32 + COL_W;
+  const xL_qf = xL_r16 + COL_W;
+  const xL_sf = xL_qf + COL_W;
+  const xCENTER = xL_sf + COL_W;
+  const xR_sf = xCENTER + COL_W * 0.6;
+  const xR_qf = xR_sf + COL_W;
+  const xR_r16 = xR_qf + COL_W;
+  const xR_r32 = xR_r16 + COL_W;
+  const SVG_W = xR_r32 + CARD_W + 10;
+  const SVG_H = TOTAL_H + 40;
+
+  // ── Composant carte équipe ──
+  const TeamCard = ({
+    id,
+    side,
+    x,
+    y,
+    color
+  }) => {
+    const team = getTeam(id, side);
+    const sc = getScore(id);
+    const won = isWinner(id, side);
+    const pending = !sc.done;
+    const isPlaceholder = !allBracket[id] || !(side === 1 ? allBracket[id].eq1 : allBracket[id].eq2);
+    return React.createElement("g", null,
+    // fond carte
+    React.createElement("rect", {
+      x,
+      y,
+      width: CARD_W,
+      height: CARD_H,
+      rx: 4,
+      fill: won ? `${color}33` : "#111827",
+      stroke: won ? color : pending ? "#1e2a3a" : `${color}66`,
+      strokeWidth: won ? 1.5 : 1
+    }),
+    // nom équipe (tronqué)
+    React.createElement("text", {
+      x: x + 6,
+      y: y + CARD_H / 2 + 4,
+      fontSize: 10,
+      fill: isPlaceholder ? "#3a4a5a" : won ? "#fff" : "#c8d0e0",
+      fontWeight: won ? 700 : 400,
+      fontFamily: "Segoe UI, system-ui, sans-serif",
+      style: {
+        fontStyle: isPlaceholder ? "italic" : "normal"
+      }
+    }, team.length > 16 ? team.slice(0, 15) + "…" : team),
+    // score
+    sc.done && React.createElement("text", {
+      x: x + CARD_W - 22,
+      y: y + CARD_H / 2 + 4,
+      fontSize: 11,
+      fontWeight: 800,
+      textAnchor: "middle",
+      fill: won ? color : "#6b7280",
+      fontFamily: "Segoe UI, system-ui, sans-serif"
+    }, side === 1 ? sc.g1 : sc.g2));
+  };
+
+  // ── Composant match complet (2 cartes) ──
+  const Match = ({
+    id,
+    x,
+    yCenter,
+    color,
+    flip
+  }) => {
+    const y1 = yCenter - CARD_H - GAP_V / 2;
+    const y2 = yCenter + GAP_V / 2;
+    const s1 = flip ? 2 : 1,
+      s2 = flip ? 1 : 2;
+    return React.createElement("g", {
+      key: id
+    }, React.createElement(TeamCard, {
+      id,
+      side: s1,
+      x,
+      y: y1,
+      color
+    }), React.createElement(TeamCard, {
+      id,
+      side: s2,
+      x,
+      y: y2,
+      color
+    }),
+    // séparateur central
+    React.createElement("line", {
+      x1: x + 4,
+      y1: yCenter,
+      x2: x + CARD_W - 4,
+      y2: yCenter,
+      stroke: "#1e2a3a",
+      strokeWidth: 1
+    }));
+  };
+
+  // ── Ligne de connexion entre rounds ──
+  const Connector = ({
+    x1,
+    y1,
+    x2,
+    y2,
+    color
+  }) => React.createElement("path", {
+    d: `M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}`,
+    fill: "none",
+    stroke: `${color}55`,
+    strokeWidth: 1.5
+  });
+
+  // ── Rendu final ──
+  const finEqs = allBracket["FIN"] || {};
+  const p3Eqs = allBracket["3PL"] || {};
+  const finSc = getScore("FIN");
+  const p3Sc = getScore("3PL");
+  return React.createElement("div", {
+    style: {
+      overflowX: "auto",
+      padding: "16px 8px",
+      paddingBottom: 40
+    }
+  },
+  // Titre
+  React.createElement("div", {
+    style: {
+      textAlign: "center",
+      marginBottom: 20
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 800,
+      color: "#c0b037",
+      letterSpacing: 3,
+      textTransform: "uppercase"
+    }
+  }, "🏆 Tableau de la Phase Finale"), React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#4a6080",
+      marginTop: 4
+    }
+  }, "Se remplit automatiquement au fil des scores saisis · Cliquez sur les onglets pour saisir les scores")), React.createElement("svg", {
+    width: SVG_W,
+    height: SVG_H,
+    style: {
+      display: "block",
+      margin: "0 auto"
+    },
+    viewBox: `0 0 ${SVG_W} ${SVG_H}`
+  },
+  // ── CÔTÉ GAUCHE ──
+
+  // R32 gauche (8 matchs)
+  ...LEFT.r32.map((id, i) => React.createElement(Match, {
+    key: id,
+    id,
+    x: xL_r32,
+    yCenter: yR32(i) + 20,
+    color: COL.r32
+  })),
+  // Connecteurs R32→R16 gauche
+  ...LEFT.r16.map((_, i) => React.createElement(Connector, {
+    key: `cl32-${i}a`,
+    x1: xL_r32 + CARD_W,
+    y1: yR32(i * 2) + 20,
+    x2: xL_r16,
+    y2: yR16(i) + 20,
+    color: COL.r32
+  })), ...LEFT.r16.map((_, i) => React.createElement(Connector, {
+    key: `cl32-${i}b`,
+    x1: xL_r32 + CARD_W,
+    y1: yR32(i * 2 + 1) + 20,
+    x2: xL_r16,
+    y2: yR16(i) + 20,
+    color: COL.r32
+  })),
+  // R16 gauche (4 matchs)
+  ...LEFT.r16.map((id, i) => React.createElement(Match, {
+    key: id,
+    id,
+    x: xL_r16,
+    yCenter: yR16(i) + 20,
+    color: COL.r16
+  })),
+  // Connecteurs R16→QF gauche
+  ...LEFT.qf.map((_, i) => React.createElement(Connector, {
+    key: `cl16-${i}a`,
+    x1: xL_r16 + CARD_W,
+    y1: yR16(i * 2) + 20,
+    x2: xL_qf,
+    y2: yQF(i) + 20,
+    color: COL.r16
+  })), ...LEFT.qf.map((_, i) => React.createElement(Connector, {
+    key: `cl16-${i}b`,
+    x1: xL_r16 + CARD_W,
+    y1: yR16(i * 2 + 1) + 20,
+    x2: xL_qf,
+    y2: yQF(i) + 20,
+    color: COL.r16
+  })),
+  // QF gauche (2 matchs)
+  ...LEFT.qf.map((id, i) => React.createElement(Match, {
+    key: id,
+    id,
+    x: xL_qf,
+    yCenter: yQF(i) + 20,
+    color: COL.qf
+  })),
+  // Connecteurs QF→SF gauche
+  React.createElement(Connector, {
+    key: "clqf-a",
+    x1: xL_qf + CARD_W,
+    y1: yQF(0) + 20,
+    x2: xL_sf,
+    y2: ySF() + 20,
+    color: COL.qf
+  }), React.createElement(Connector, {
+    key: "clqf-b",
+    x1: xL_qf + CARD_W,
+    y1: yQF(1) + 20,
+    x2: xL_sf,
+    y2: ySF() + 20,
+    color: COL.qf
+  }),
+  // SF gauche
+  React.createElement(Match, {
+    key: "SF-1",
+    id: "SF-1",
+    x: xL_sf,
+    yCenter: ySF() + 20,
+    color: COL.sf
+  }),
+  // Connecteur SF→FIN gauche
+  React.createElement(Connector, {
+    key: "clsf",
+    x1: xL_sf + CARD_W,
+    y1: ySF() + 20,
+    x2: xCENTER,
+    y2: yFIN + 10,
+    color: COL.sf
+  }),
+  // ── CÔTÉ DROIT ──
+
+  // R32 droit (8 matchs, flip=true pour afficher eq2 en haut)
+  ...RIGHT.r32.map((id, i) => React.createElement(Match, {
+    key: id,
+    id,
+    x: xR_r32,
+    yCenter: yR32(i) + 20,
+    color: COL.r32,
+    flip: true
+  })),
+  // Connecteurs R32→R16 droit
+  ...RIGHT.r16.map((_, i) => React.createElement(Connector, {
+    key: `cr32-${i}a`,
+    x1: xR_r32,
+    y1: yR32(i * 2) + 20,
+    x2: xR_r16 + CARD_W,
+    y2: yR16(i) + 20,
+    color: COL.r32
+  })), ...RIGHT.r16.map((_, i) => React.createElement(Connector, {
+    key: `cr32-${i}b`,
+    x1: xR_r32,
+    y1: yR32(i * 2 + 1) + 20,
+    x2: xR_r16 + CARD_W,
+    y2: yR16(i) + 20,
+    color: COL.r32
+  })),
+  // R16 droit (4 matchs)
+  ...RIGHT.r16.map((id, i) => React.createElement(Match, {
+    key: id,
+    id,
+    x: xR_r16,
+    yCenter: yR16(i) + 20,
+    color: COL.r16
+  })),
+  // Connecteurs R16→QF droit
+  ...RIGHT.qf.map((_, i) => React.createElement(Connector, {
+    key: `cr16-${i}a`,
+    x1: xR_r16,
+    y1: yR16(i * 2) + 20,
+    x2: xR_qf + CARD_W,
+    y2: yQF(i) + 20,
+    color: COL.r16
+  })), ...RIGHT.qf.map((_, i) => React.createElement(Connector, {
+    key: `cr16-${i}b`,
+    x1: xR_r16,
+    y1: yR16(i * 2 + 1) + 20,
+    x2: xR_qf + CARD_W,
+    y2: yQF(i) + 20,
+    color: COL.r16
+  })),
+  // QF droit (2 matchs)
+  ...RIGHT.qf.map((id, i) => React.createElement(Match, {
+    key: id,
+    id,
+    x: xR_qf,
+    yCenter: yQF(i) + 20,
+    color: COL.qf
+  })),
+  // Connecteurs QF→SF droit
+  React.createElement(Connector, {
+    key: "crqf-a",
+    x1: xR_qf,
+    y1: yQF(0) + 20,
+    x2: xR_sf + CARD_W,
+    y2: ySF() + 20,
+    color: COL.qf
+  }), React.createElement(Connector, {
+    key: "crqf-b",
+    x1: xR_qf,
+    y1: yQF(1) + 20,
+    x2: xR_sf + CARD_W,
+    y2: ySF() + 20,
+    color: COL.qf
+  }),
+  // SF droit
+  React.createElement(Match, {
+    key: "SF-2",
+    id: "SF-2",
+    x: xR_sf,
+    yCenter: ySF() + 20,
+    color: COL.sf
+  }),
+  // Connecteur SF→FIN droit
+  React.createElement(Connector, {
+    key: "crsf",
+    x1: xR_sf,
+    y1: ySF() + 20,
+    x2: xCENTER + COL_W * 0.6 - 10,
+    y2: yFIN + 10,
+    color: COL.sf
+  }),
+  // ── FINALE & PETITE FINALE au centre ──
+
+  // Bloc finale
+  React.createElement("g", null,
+  // Halo
+  React.createElement("rect", {
+    x: xCENTER - 5,
+    y: yFIN - 50,
+    width: COL_W * 0.6 + 10,
+    height: 90,
+    rx: 8,
+    fill: "#0a0f1e",
+    stroke: "#c0b03766",
+    strokeWidth: 2
+  }), React.createElement("text", {
+    x: xCENTER + COL_W * 0.3 - 10,
+    y: yFIN - 36,
+    textAnchor: "middle",
+    fontSize: 9,
+    fontWeight: 800,
+    fill: "#c0b037",
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    fontFamily: "Segoe UI, system-ui, sans-serif"
+  }, "🏆 FINALE"), React.createElement("text", {
+    x: xCENTER + COL_W * 0.3 - 10,
+    y: yFIN - 24,
+    textAnchor: "middle",
+    fontSize: 8,
+    fill: "#5a6070",
+    fontFamily: "Segoe UI, system-ui, sans-serif"
+  }, "19 juil · MetLife Stadium"),
+  // Carte eq1
+  React.createElement("rect", {
+    x: xCENTER,
+    y: yFIN - 16,
+    width: COL_W * 0.6 - 10,
+    height: 26,
+    rx: 4,
+    fill: isWinner("FIN", 1) ? "#c0b03733" : "#111827",
+    stroke: isWinner("FIN", 1) ? "#c0b037" : "#c0b03744",
+    strokeWidth: isWinner("FIN", 1) ? 2 : 1
+  }), React.createElement("text", {
+    x: xCENTER + 6,
+    y: yFIN - 16 + 16,
+    fontSize: 10,
+    fill: finEqs.eq1 ? isWinner("FIN", 1) ? "#fff" : "#c8d0e0" : "#3a4a5a",
+    fontWeight: isWinner("FIN", 1) ? 800 : 400,
+    fontFamily: "Segoe UI, system-ui, sans-serif",
+    style: {
+      fontStyle: finEqs.eq1 ? "normal" : "italic"
+    }
+  }, (finEqs.eq1 || "Vainq. SF-1").slice(0, 16)), finSc.done && React.createElement("text", {
+    x: xCENTER + COL_W * 0.6 - 18,
+    y: yFIN - 16 + 16,
+    fontSize: 11,
+    fontWeight: 800,
+    fill: isWinner("FIN", 1) ? "#c0b037" : "#6b7280",
+    fontFamily: "Segoe UI, system-ui, sans-serif"
+  }, finSc.g1),
+  // Séparateur
+  React.createElement("line", {
+    x1: xCENTER + 4,
+    y1: yFIN + 10,
+    x2: xCENTER + COL_W * 0.6 - 14,
+    y2: yFIN + 10,
+    stroke: "#c0b03733",
+    strokeWidth: 1
+  }),
+  // Carte eq2
+  React.createElement("rect", {
+    x: xCENTER,
+    y: yFIN + 12,
+    width: COL_W * 0.6 - 10,
+    height: 26,
+    rx: 4,
+    fill: isWinner("FIN", 2) ? "#c0b03733" : "#111827",
+    stroke: isWinner("FIN", 2) ? "#c0b037" : "#c0b03744",
+    strokeWidth: isWinner("FIN", 2) ? 2 : 1
+  }), React.createElement("text", {
+    x: xCENTER + 6,
+    y: yFIN + 12 + 16,
+    fontSize: 10,
+    fill: finEqs.eq2 ? isWinner("FIN", 2) ? "#fff" : "#c8d0e0" : "#3a4a5a",
+    fontWeight: isWinner("FIN", 2) ? 800 : 400,
+    fontFamily: "Segoe UI, system-ui, sans-serif",
+    style: {
+      fontStyle: finEqs.eq2 ? "normal" : "italic"
+    }
+  }, (finEqs.eq2 || "Vainq. SF-2").slice(0, 16)), finSc.done && React.createElement("text", {
+    x: xCENTER + COL_W * 0.6 - 18,
+    y: yFIN + 12 + 16,
+    fontSize: 11,
+    fontWeight: 800,
+    fill: isWinner("FIN", 2) ? "#c0b037" : "#6b7280",
+    fontFamily: "Segoe UI, system-ui, sans-serif"
+  }, finSc.g2)),
+  // Petite finale (en dessous)
+  React.createElement("g", null, React.createElement("text", {
+    x: xCENTER + COL_W * 0.3 - 10,
+    y: yFIN + 74,
+    textAnchor: "middle",
+    fontSize: 8,
+    fontWeight: 700,
+    fill: "#27ae60",
+    fontFamily: "Segoe UI, system-ui, sans-serif"
+  }, "3e PLACE · 18 juil"), React.createElement("rect", {
+    x: xCENTER,
+    y: yFIN + 80,
+    width: COL_W * 0.6 - 10,
+    height: 24,
+    rx: 4,
+    fill: "#111827",
+    stroke: "#27ae6055",
+    strokeWidth: 1
+  }), React.createElement("text", {
+    x: xCENTER + 6,
+    y: yFIN + 80 + 15,
+    fontSize: 9,
+    fill: p3Eqs.eq1 ? "#c8d0e0" : "#3a4a5a",
+    fontFamily: "Segoe UI, system-ui, sans-serif",
+    style: {
+      fontStyle: p3Eqs.eq1 ? "normal" : "italic"
+    }
+  }, (p3Eqs.eq1 || "Perd. SF-1").slice(0, 16)), p3Sc.done && React.createElement("text", {
+    x: xCENTER + COL_W * 0.6 - 18,
+    y: yFIN + 80 + 15,
+    fontSize: 10,
+    fontWeight: 700,
+    fill: "#27ae60",
+    fontFamily: "Segoe UI, system-ui, sans-serif"
+  }, p3Sc.g1), React.createElement("rect", {
+    x: xCENTER,
+    y: yFIN + 106,
+    width: COL_W * 0.6 - 10,
+    height: 24,
+    rx: 4,
+    fill: "#111827",
+    stroke: "#27ae6055",
+    strokeWidth: 1
+  }), React.createElement("text", {
+    x: xCENTER + 6,
+    y: yFIN + 106 + 15,
+    fontSize: 9,
+    fill: p3Eqs.eq2 ? "#c8d0e0" : "#3a4a5a",
+    fontFamily: "Segoe UI, system-ui, sans-serif",
+    style: {
+      fontStyle: p3Eqs.eq2 ? "normal" : "italic"
+    }
+  }, (p3Eqs.eq2 || "Perd. SF-2").slice(0, 16)), p3Sc.done && React.createElement("text", {
+    x: xCENTER + COL_W * 0.6 - 18,
+    y: yFIN + 106 + 15,
+    fontSize: 10,
+    fontWeight: 700,
+    fill: "#27ae60",
+    fontFamily: "Segoe UI, system-ui, sans-serif"
+  }, p3Sc.g2)),
+  // Légende labels rounds
+  ...[[xL_r32 + CARD_W / 2, SVG_H - 12, "1/16", COL.r32], [xL_r16 + CARD_W / 2, SVG_H - 12, "1/8", COL.r16], [xL_qf + CARD_W / 2, SVG_H - 12, "1/4", COL.qf], [xL_sf + CARD_W / 2, SVG_H - 12, "1/2", COL.sf], [xR_sf + CARD_W / 2, SVG_H - 12, "1/2", COL.sf], [xR_qf + CARD_W / 2, SVG_H - 12, "1/4", COL.qf], [xR_r16 + CARD_W / 2, SVG_H - 12, "1/8", COL.r16], [xR_r32 + CARD_W / 2, SVG_H - 12, "1/16", COL.r32]].map(([x, y, label, color], i) => React.createElement("text", {
+    key: `lbl-${i}`,
+    x,
+    y,
+    textAnchor: "middle",
+    fontSize: 8,
+    fontWeight: 700,
+    fill: color,
+    fontFamily: "Segoe UI, system-ui, sans-serif",
+    letterSpacing: 1
+  }, label))));
+}
+
   function AgendaTab({
     scores,
     allBracket
@@ -2188,6 +2807,9 @@ try {
       style: tabSt("agenda"),
       onClick: () => setTab("agenda")
     }, "📅 Agenda"), /*#__PURE__*/React.createElement("button", {
+      style: tabSt("bracket"),
+      onClick: () => setTab("bracket")
+    }, "🗂 Bracket"), /*#__PURE__*/React.createElement("button", {
       onClick: resetAll,
       style: {
         marginLeft: "auto",
@@ -2496,7 +3118,10 @@ try {
           highlight: !!(eqs.eq1 && eqs.eq2)
         });
       }));
-    })), tab === "agenda" && /*#__PURE__*/React.createElement(AgendaTab, {
+    })), tab === "bracket" && /*#__PURE__*/React.createElement(BracketTab, {
+      allBracket: allBracket,
+      scores: scores
+    }), tab === "agenda" && /*#__PURE__*/React.createElement(AgendaTab, {
       scores: scores,
       allBracket: allBracket
     }), tab === "tableau" && /*#__PURE__*/React.createElement("div", {
