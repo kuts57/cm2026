@@ -1679,274 +1679,383 @@ try {
   }
 
   // ─── COMPOSANT AGENDA ────────────────────────────────────────────────────────
-  // ─── COMPOSANT BRACKET V2 — Structure officielle FIFA 2026 ─────────────────
-// ─── BRACKET VISUEL V2 — structure officielle FIFA 2026 ─────────────────────
+  // ─── COMPOSANT BRACKET V3 — Structure officielle FIFA 2026 (source: FIFA/Wikipedia) ─
+// ─── BRACKET OFFICIEL FIFA 2026 — SOURCE : FIFA / L'ÉQUIPE / WIKIPEDIA ────────
+// Matchs 73-88 : 1/16 de finale
+// Matchs 89-96 : 1/8 de finale  
+// Matchs 97-100: Quarts de finale
+// Matchs 101-102: Demi-finales
+// Match 103: Petite finale | Final: 19 juillet
+
 function BracketTab({
   scores,
   thirds
 }) {
-  // ── Données officielles des 16 matchs du 1/16 ──────────────────────────────
-  // Structure côté GAUCHE : M73, M75, M74, M76 → M89, M90 → M97 → SF-1
-  // Structure côté DROIT  : M78, M77, M79, M80 → M91, M92 → M99 → SF-1 (même demi)
-  // ...non, on utilise les vrais numéros R32 avec le bon mapping
+  // Mapping IDs FIFA (M73..M102+FIN+3PL) → IDs scores de l'appli (R32-1..R32-16, R16-1..R16-8, etc.)
+  // LEFT_R32_ORDER = [74,77,73,75,76,78,79,80] → R32-3,R32-6,R32-1,R32-2,R32-4,R32-5,R32-7,R32-8
+  // RIGHT_R32_ORDER= [84,83,86,88,81,82,87,85] → R32-15,R32-11,R32-15... non, voir mapping réel:
+  // M73=R32-1(AfSud/Can), M74=R32-3(All/3e), M75=R32-2(PB/Maroc->1erF vs 2eC... non)
+  // Pour simplifier: on crée un alias direct match FIFA→appli IDs
+  const FIFA_TO_APP = {
+    // R32 (1/16)
+    "M73": "R32-1",  "M74": "R32-3",  "M75": "R32-4",  "M76": "R32-2",
+    "M77": "R32-6",  "M78": "R32-5",  "M79": "R32-7",  "M80": "R32-8",
+    "M81": "R32-10", "M82": "R32-9",  "M83": "R32-12", "M84": "R32-11",
+    "M85": "R32-13", "M86": "R32-16", "M87": "R32-15", "M88": "R32-14",
+    // R16 (1/8)
+    "M89": "R16-2",  "M90": "R16-1",  "M91": "R16-3",  "M92": "R16-4",
+    "M93": "R16-6",  "M94": "R16-5",  "M95": "R16-8",  "M96": "R16-7",
+    // QF
+    "M97": "QF-1",   "M98": "QF-2",   "M99": "QF-3",   "M100":"QF-4",
+    // SF + finale
+    "M101":"SF-1",   "M102":"SF-2",   "FIN": "FIN",    "M103":"3PL",
+  };
+  // Fonction qui lit le score avec l'ID de l'appli (function hoistée pour compatibilité Safari)
+  function sc(fifaId) { return scores[FIFA_TO_APP[fifaId]] || {g1:"",g2:""}; }
 
-  // Mapping officiel R32 → équipes réelles
-  // Source : FIFA / Sky Sports / CBS Sports (27 juin 2026)
-  const OFFICIAL_R32 = {
-    // CÔTÉ GAUCHE (mène vers SF-1 puis finale)
-    "R32-A": {
+  // ── 16 matchs officiels du 1/16 ────────────────────────────────────────────
+  const M = {
+    73: {
       eq1: "🇿🇦 Afrique du Sud",
       eq2: "🇨🇦 Canada",
       date: "28 juin",
-      heure: "21h00",
-      stade: "SoFi Stadium, Los Angeles"
+      h: "21h00"
     },
-    "R32-B": {
+    74: {
+      eq1: "🇩🇪 Allemagne",
+      eq2: "3e Gr.A/B/C/D/F",
+      date: "29 juin",
+      h: "22h30"
+    },
+    75: {
       eq1: "🇳🇱 Pays-Bas",
       eq2: "🇲🇦 Maroc",
       date: "30 juin",
-      heure: "02h00",
-      stade: "Estadio Akron, Guadalajara"
+      h: "02h00"
     },
-    "R32-C": {
-      eq1: "🇩🇪 Allemagne",
-      eq2: "3e (A/B/C/D/F)",
-      date: "30 juin",
-      heure: "03h30",
-      stade: "Gillette Stadium, Boston"
-    },
-    "R32-D": {
+    76: {
       eq1: "🇧🇷 Brésil",
       eq2: "🇯🇵 Japon",
       date: "29 juin",
-      heure: "23h00",
-      stade: "NRG Stadium, Houston"
+      h: "19h00"
     },
-    "R32-E": {
+    77: {
       eq1: "🇫🇷 France",
-      eq2: "3e (C/D/F/G/H)",
-      date: "1er juil",
-      heure: "02h00",
-      stade: "MetLife Stadium, New York"
+      eq2: "3e Gr.C/D/F/G/H",
+      date: "30 juin",
+      h: "23h00"
     },
-    "R32-F": {
-      eq1: "🇲🇽 Mexique",
-      eq2: "3e (C/E/F/H/I)",
-      date: "1er juil",
-      heure: "04h00",
-      stade: "Estadio Azteca, Mexico City"
-    },
-    "R32-G": {
-      eq1: "🏴 Angleterre",
-      eq2: "🇸🇳 Sénégal",
-      date: "1er juil",
-      heure: "23h00",
-      stade: "Mercedes-Benz, Atlanta"
-    },
-    "R32-H": {
-      eq1: "🇪🇬 Égypte",
-      eq2: "3e (A/E/H/I/J)",
-      date: "2 juil",
-      heure: "01h00",
-      stade: "Lumen Field, Seattle"
-    },
-    // CÔTÉ DROIT (mène vers SF-2 puis finale)
-    "R32-I": {
-      eq1: "🇺🇸 États-Unis",
-      eq2: "🇧🇦 Bosnie-Herz.",
-      date: "2 juil",
-      heure: "07h00",
-      stade: "Levi's Stadium, San Francisco"
-    },
-    "R32-J": {
-      eq1: "🇪🇸 Espagne",
-      eq2: "🇦🇹 Autriche",
-      date: "3 juil",
-      heure: "02h00",
-      stade: "SoFi Stadium, Los Angeles"
-    },
-    "R32-K": {
-      eq1: "🇨🇭 Suisse",
-      eq2: "🇧🇪 Belgique",
-      date: "4 juil",
-      heure: "03h30",
-      stade: "BC Place, Vancouver"
-    },
-    "R32-L": {
-      eq1: "🇵🇹 Portugal",
-      eq2: "🇬🇭 Ghana",
-      date: "3 juil",
-      heure: "02h00",
-      stade: "BMO Field, Toronto"
-    },
-    "R32-M": {
+    78: {
       eq1: "🇨🇮 Côte d'Ivoire",
       eq2: "🇳🇴 Norvège",
       date: "30 juin",
-      heure: "23h00",
-      stade: "AT&T Stadium, Dallas"
+      h: "19h00"
     },
-    "R32-N": {
-      eq1: "🇦🇺 Australie",
-      eq2: "🇮🇷 Iran",
-      date: "4 juil",
-      heure: "05h00",
-      stade: "Arrowhead, Kansas City"
+    79: {
+      eq1: "🇲🇽 Mexique",
+      eq2: "3e Gr.C/E/F/H/I",
+      date: "1er juil",
+      h: "04h00"
     },
-    "R32-O": {
+    80: {
+      eq1: "🏴 Angleterre",
+      eq2: "3e Gr.E/H/I/J/K",
+      date: "1er juil",
+      h: "23h00"
+    },
+    81: {
+      eq1: "🇺🇸 États-Unis",
+      eq2: "🇧🇦 Bosnie-Herz.",
+      date: "2 juil",
+      h: "07h00"
+    },
+    82: {
+      eq1: "🇪🇬 Égypte",
+      eq2: "3e Gr.A/E/H/I/J",
+      date: "1er juil",
+      h: "01h00"
+    },
+    83: {
+      eq1: "🇵🇹 Portugal",
+      eq2: "🇬🇭 Ghana",
+      date: "3 juil",
+      h: "02h00"
+    },
+    84: {
+      eq1: "🇪🇸 Espagne",
+      eq2: "🇦🇹 Autriche",
+      date: "3 juil",
+      h: "02h00"
+    },
+    85: {
+      eq1: "🇨🇭 Suisse",
+      eq2: "3e Gr.E/F/G/I/J",
+      date: "3 juil",
+      h: "05h00"
+    },
+    86: {
       eq1: "🇦🇷 Argentine",
       eq2: "🇺🇾 Uruguay",
       date: "4 juil",
-      heure: "05h00",
-      stade: "Hard Rock Stadium, Miami"
+      h: "05h00"
     },
-    "R32-P": {
+    87: {
       eq1: "🇨🇴 Colombie",
-      eq2: "🇭🇷 Croatie",
+      eq2: "3e Gr.D/E/I/J/L",
       date: "4 juil",
-      heure: "08h00",
-      stade: "Arrowhead, Kansas City"
+      h: "08h00"
+    },
+    88: {
+      eq1: "🇦🇺 Australie",
+      eq2: "🇮🇷 Iran",
+      date: "4 juil",
+      h: "05h00"
     }
   };
 
-  // IDs dans l'ordre bracket : côté gauche haut→bas, côté droit haut→bas
-  // Structure : les vainqueurs de R32-A vs R32-B → 1/8 gauche haut
-  //             les vainqueurs de R32-C vs R32-D → 1/8 gauche bas haut
-  //             etc.
-  const LEFT_R32 = ["R32-A", "R32-B", "R32-C", "R32-D", "R32-E", "R32-F", "R32-G", "R32-H"];
-  const RIGHT_R32 = ["R32-I", "R32-J", "R32-K", "R32-L", "R32-M", "R32-N", "R32-O", "R32-P"];
+  // ── Structure officielle 1/8 (matches 89-96) ────────────────────────────────
+  // M89 = W74 vs W77  (Allemagne/France zone → Philadelphie 4 juil)
+  // M90 = W73 vs W75  (AfSud+Can / PB+Maroc → Houston 4 juil)
+  // M91 = W76 vs W78  (Brésil+Jap / CdI+Nor → New York 5 juil)
+  // M92 = W79 vs W80  (Mexique / Angleterre → Mexico City 6 juil)
+  // M93 = W83 vs W84  (Port / Espagne → Dallas 6 juil)
+  // M94 = W81 vs W82  (USA / Egypte → Seattle 7 juil)
+  // M95 = W86 vs W88  (Argentine / Australie → Atlanta 7 juil)
+  // M96 = W85 vs W87  (Suisse / Colombie → Vancouver 7 juil)
 
-  // Résolution des vainqueurs pour les rounds suivants
-  // On utilise un état local de scores (indexés par nos nouveaux IDs)
-  const getScore = id => scores[id] || {
-    g1: "",
-    g2: ""
-  };
-  const winner = (id, eq1, eq2) => {
-    const s = scores[id] || {};
+  // ── Structure 1/4 (97-100) ──────────────────────────────────────────────────
+  // M97 = W89 vs W90  (Alli/Fra zone vs AfSud/PB zone → Boston)
+  // M98 = W91 vs W92  (Brésil/CdI zone vs Mexique/Ang zone → NY)
+  // M99 = W93 vs W94  (Port/Esp zone vs USA/Eg zone → Dallas)
+  // M100= W95 vs W96  (Argentine zone vs Suisse/Col zone → Miami)
+
+  // ── Demis ────────────────────────────────────────────────────────────────────
+  // M101= W97 vs W98  (côté Europe/Amérique du Sud haut)
+  // M102= W99 vs W100 (côté Amériques bas)
+
+  // ── Organisation visuelle : 8 colonnes de gauche à droite ───────────────────
+  // CÔTÉ GAUCHE (→ M101):
+  //   Col 0 (1/16): M74, M73, M77, M75, M76, M78, M79, M80 (ordre haut→bas bracket)
+  //     Paires R16: M74+M77→M89, M73+M75→M90, M76+M78→M91, M79+M80→M92
+  //   Col 1 (1/8):  M89, M90, M91, M92
+  //     Paires QF:  M89+M90→M97, M91+M92→M98
+  //   Col 2 (QF):   M97, M98
+  //   Col 3 (SF):   M101
+
+  // CÔTÉ DROIT (→ M102):
+  //   Col 8 (1/16): M84, M83, M86, M88, M81, M82, M87, M85
+  //     Paires R16: M83+M84→M93, M81+M82→M94, M86+M88→M95, M85+M87→M96
+  //   Col 7 (1/8):  M93, M94, M95, M96
+  //     Paires QF:  M93+M94→M99, M95+M96→M100
+  //   Col 6 (QF):   M99, M100
+  //   Col 5 (SF):   M102
+
+  // Ordre visuel gauche (de haut en bas) : M74, M77, M73, M75, M76, M78, M79, M80
+  const LEFT_R32_ORDER = [74, 77, 73, 75, 76, 78, 79, 80];
+  // Ordre visuel droit  (de haut en bas) : M84, M83, M86, M88, M81, M82, M87, M85
+  const RIGHT_R32_ORDER = [84, 83, 86, 88, 81, 82, 87, 85];
+
+  // Paires 1/8 gauche (index dans LEFT_R32_ORDER)
+  // M89: W(M74[0]) vs W(M77[1]) → 1/8 position 0
+  // M90: W(M73[2]) vs W(M75[3]) → 1/8 position 1
+  // M91: W(M76[4]) vs W(M78[5]) → 1/8 position 2
+  // M92: W(M79[6]) vs W(M80[7]) → 1/8 position 3
+  const R16_L = [{
+    id: "M89",
+    n: 89,
+    eq1: null,
+    eq2: null,
+    src: [74, 77],
+    date: "4 juil",
+    h: "21h00",
+    city: "Philadelphie"
+  }, {
+    id: "M90",
+    n: 90,
+    eq1: null,
+    eq2: null,
+    src: [73, 75],
+    date: "4 juil",
+    h: "21h00",
+    city: "Houston"
+  }, {
+    id: "M91",
+    n: 91,
+    eq1: null,
+    eq2: null,
+    src: [76, 78],
+    date: "5 juil",
+    h: "20h00",
+    city: "New York"
+  }, {
+    id: "M92",
+    n: 92,
+    eq1: null,
+    eq2: null,
+    src: [79, 80],
+    date: "6 juil",
+    h: "02h00",
+    city: "Mexico City"
+  }];
+  // Paires 1/8 droit
+  // M93: W(M83[1]) vs W(M84[0]) → 1/8 position 0
+  // M94: W(M81[4]) vs W(M82[5]) → 1/8 position 1
+  // M95: W(M86[2]) vs W(M88[3]) → 1/8 position 2
+  // M96: W(M85[7]) vs W(M87[6]) → 1/8 position 3
+  const R16_R = [{
+    id: "M93",
+    n: 93,
+    eq1: null,
+    eq2: null,
+    src: [83, 84],
+    date: "6 juil",
+    h: "21h00",
+    city: "Dallas"
+  }, {
+    id: "M94",
+    n: 94,
+    eq1: null,
+    eq2: null,
+    src: [81, 82],
+    date: "7 juil",
+    h: "01h00",
+    city: "Seattle"
+  }, {
+    id: "M95",
+    n: 95,
+    eq1: null,
+    eq2: null,
+    src: [86, 88],
+    date: "7 juil",
+    h: "21h00",
+    city: "Atlanta"
+  }, {
+    id: "M96",
+    n: 96,
+    eq1: null,
+    eq2: null,
+    src: [85, 87],
+    date: "8 juil",
+    h: "03h30",
+    city: "Vancouver"
+  }];
+
+  // ── Résolution des équipes ───────────────────────────────────────────────────
+  function getScore(id) { return sc(id); }
+  function wonMatch(id, eq1, eq2) {
+    const s = sc(id);
     const g1 = parseInt(s.g1, 10),
       g2 = parseInt(s.g2, 10);
     if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return null;
     if (g1 === g2) return null;
     return g1 > g2 ? eq1 : eq2;
   };
-  const loser = (id, eq1, eq2) => {
-    const s = scores[id] || {};
+  function lostMatch(id, eq1, eq2) {
+    const s = sc(id);
     const g1 = parseInt(s.g1, 10),
       g2 = parseInt(s.g2, 10);
     if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return null;
     if (g1 === g2) return null;
     return g1 > g2 ? eq2 : eq1;
   };
-
-  // Résolution cascadante depuis les vrais scores (via allBracket global manquant ici)
-  // On remplace par une résolution locale basée sur OFFICIAL_R32
-  const resolveR32 = id => OFFICIAL_R32[id] || {};
-  const w = id => {
-    const m = resolveR32(id);
-    return winner(id, m.eq1, m.eq2);
+  function isWin(id, side) {
+    const s = sc(id);
+    const g1 = parseInt(s.g1, 10),
+      g2 = parseInt(s.g2, 10);
+    if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return false;
+    return side === 1 ? g1 > g2 : g2 > g1;
   };
 
-  // 1/8 (R16) : paires de R32
-  const R16_L = [{
-    id: "R16-LA",
-    eq1: w("R32-A"),
-    eq2: w("R32-B")
-  }, {
-    id: "R16-LB",
-    eq1: w("R32-C"),
-    eq2: w("R32-D")
-  }, {
-    id: "R16-LC",
-    eq1: w("R32-E"),
-    eq2: w("R32-F")
-  }, {
-    id: "R16-LD",
-    eq1: w("R32-G"),
-    eq2: w("R32-H")
-  }];
-  const R16_R = [{
-    id: "R16-RA",
-    eq1: w("R32-I"),
-    eq2: w("R32-J")
-  }, {
-    id: "R16-RB",
-    eq1: w("R32-K"),
-    eq2: w("R32-L")
-  }, {
-    id: "R16-RC",
-    eq1: w("R32-M"),
-    eq2: w("R32-N")
-  }, {
-    id: "R16-RD",
-    eq1: w("R32-O"),
-    eq2: w("R32-P")
-  }];
-  const wR16 = m => winner(m.id, m.eq1, m.eq2);
-  const wQF = m => winner(m.id, m.eq1, m.eq2);
+  // Résoudre vainqueurs des R32
+  function wR32(n) { return wonMatch(`M${n}`, M[n].eq1, M[n].eq2); }
 
-  // Quarts
+  // Remplir R16
+  R16_L.forEach(m => {
+    m.eq1 = wR32(m.src[0]);
+    m.eq2 = wR32(m.src[1]);
+  });
+  R16_R.forEach(m => {
+    m.eq1 = wR32(m.src[0]);
+    m.eq2 = wR32(m.src[1]);
+  });
+  const wR16 = m => wonMatch(m.id, m.eq1, m.eq2);
+
+  // QF
   const QF_L = [{
-    id: "QF-LA",
+    id: "M97",
     eq1: wR16(R16_L[0]),
-    eq2: wR16(R16_L[1])
+    eq2: wR16(R16_L[1]),
+    date: "9 juil",
+    h: "21h00"
   }, {
-    id: "QF-LB",
+    id: "M98",
     eq1: wR16(R16_L[2]),
-    eq2: wR16(R16_L[3])
+    eq2: wR16(R16_L[3]),
+    date: "10 juil",
+    h: "21h00"
   }];
   const QF_R = [{
-    id: "QF-RA",
+    id: "M99",
     eq1: wR16(R16_R[0]),
-    eq2: wR16(R16_R[1])
+    eq2: wR16(R16_R[1]),
+    date: "11 juil",
+    h: "21h00"
   }, {
-    id: "QF-RB",
+    id: "M100",
     eq1: wR16(R16_R[2]),
-    eq2: wR16(R16_R[3])
+    eq2: wR16(R16_R[3]),
+    date: "12 juil",
+    h: "21h00"
   }];
+  const wQF = m => wonMatch(m.id, m.eq1, m.eq2);
 
-  // Demis
-  const SF = [{
-    id: "SF-1",
+  // SF
+  const SF1 = {
+    id: "M101",
     eq1: wQF(QF_L[0]),
-    eq2: wQF(QF_L[1])
-  }, {
-    id: "SF-2",
+    eq2: wQF(QF_L[1]),
+    date: "14 juil",
+    h: "21h00"
+  };
+  const SF2 = {
+    id: "M102",
     eq1: wQF(QF_R[0]),
-    eq2: wQF(QF_R[1])
-  }];
+    eq2: wQF(QF_R[1]),
+    date: "15 juil",
+    h: "21h00"
+  };
+  const FIN_eq1 = wonMatch("M101", SF1.eq1, SF1.eq2);
+  const FIN_eq2 = wonMatch("M102", SF2.eq1, SF2.eq2);
+  const P3_eq1 = lostMatch("M101", SF1.eq1, SF1.eq2);
+  const P3_eq2 = lostMatch("M102", SF2.eq1, SF2.eq2);
 
-  // Finale
-  const FIN_eq1 = winner("SF-1", SF[0].eq1, SF[0].eq2);
-  const FIN_eq2 = winner("SF-2", SF[1].eq1, SF[1].eq2);
-  const P3_eq1 = loser("SF-1", SF[0].eq1, SF[0].eq2);
-  const P3_eq2 = loser("SF-2", SF[1].eq1, SF[1].eq2);
-
-  // ── Rendu SVG ──────────────────────────────────────────────────────────────
-  const CW = 152,
+  // ── RENDU SVG ───────────────────────────────────────────────────────────────
+  const CW = 150,
     CH = 26,
-    GAP = 8,
-    ROW = CH + GAP;
-  const MH = 2 * CH + GAP + 12;
-  const BG = 18;
-  const TOTAL_H = 8 * MH + 7 * BG;
-  const COL = 172,
-    SVG_W = 9 * COL + CW + 20;
-  const SVG_H = TOTAL_H + 50;
-  const yR32 = i => i * (MH + BG) + MH / 2 + 20;
-  const yR16 = i => (yR32(i * 2) + yR32(i * 2 + 1)) / 2;
-  const yQF = i => (yR16(i * 2) + yR16(i * 2 + 1)) / 2;
-  const ySF = side => (yQF(side * 2) + yQF(side * 2 + 1)) / 2;
-  const yFIN = TOTAL_H / 2 + 20;
+    GAP = 8;
+  const MH = 2 * CH + GAP + 10;
+  const BG = 16;
+  const TOTAL_H = 8 * MH + 7 * BG + 40;
+  const COL = 170;
   const xL0 = 0,
     xL1 = COL,
     xL2 = 2 * COL,
     xL3 = 3 * COL;
-  const xR3 = 4 * COL + CW + 20;
-  const xR2 = xR3 + COL,
+  const xFIN = 4 * COL + CW / 2 - CW / 2 + 5;
+  const xR3 = xFIN + CW + COL * 0.5,
+    xR2 = xR3 + COL,
     xR1 = xR2 + COL,
     xR0 = xR1 + COL;
-  const xFIN = xL3 + CW + 10;
+  const SVG_W = xR0 + CW + 10;
+  const SVG_H = TOTAL_H + 50;
+  const yR32 = i => i * (MH + BG) + MH / 2 + 20;
+  const yR16_L = i => (yR32(i * 2) + yR32(i * 2 + 1)) / 2;
+  const yQF_L = i => (yR16_L(i * 2) + yR16_L(i * 2 + 1)) / 2;
+  const ySF_L = () => (yQF_L(0) + yQF_L(1)) / 2;
+  const yR16_R = i => (yR32(i * 2) + yR32(i * 2 + 1)) / 2;
+  const yQF_R = i => (yR16_R(i * 2) + yR16_R(i * 2 + 1)) / 2;
+  const ySF_R = () => (yQF_R(0) + yQF_R(1)) / 2;
+  const yFIN = TOTAL_H / 2;
   const TC = {
     r32: "#3a7bd5",
     r16: "#8e44ad",
@@ -1955,30 +2064,18 @@ function BracketTab({
     fin: "#c0b037",
     p3: "#27ae60"
   };
-  const isWin = (id, side, eq1, eq2) => {
-    const s = scores[id] || {};
-    const g1 = parseInt(s.g1, 10),
-      g2 = parseInt(s.g2, 10);
-    if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return false;
-    return side === 1 ? g1 > g2 : g2 > g1;
-  };
   const Card = ({
-    id,
+    matchId,
     side,
     eq,
     x,
     y,
-    color,
-    isRight
+    color
   }) => {
-    const s = scores[id] || {
-      g1: "",
-      g2: ""
-    };
+    const s = sc(matchId);
     const sc = side === 1 ? s.g1 : s.g2;
-    const won = isWin(id, side);
+    const won = isWin(matchId, side);
     const isPH = !eq || eq.startsWith("3e") || eq === "À déterm.";
-    const flip = isRight; // côté droit : eq2 en haut
     return React.createElement("g", null, React.createElement("rect", {
       x,
       y,
@@ -2006,26 +2103,25 @@ function BracketTab({
       fontFamily: "Segoe UI,system-ui,sans-serif"
     }, sc));
   };
-  const Match = ({
-    id,
+  const Match2 = ({
+    matchId,
     eq1,
     eq2,
     x,
     yc,
-    color,
-    isRight
+    color
   }) => {
     const y1 = yc - CH - GAP / 2,
       y2 = yc + GAP / 2;
     return React.createElement("g", null, React.createElement(Card, {
-      id,
+      matchId,
       side: 1,
       eq: eq1,
       x,
       y: y1,
       color
     }), React.createElement(Card, {
-      id,
+      matchId,
       side: 2,
       eq: eq2,
       x,
@@ -2052,16 +2148,19 @@ function BracketTab({
     stroke: `${color}55`,
     strokeWidth: 1.5
   });
-
-  // Connexions côté gauche : droite de la carte → gauche de la prochaine colonne
-  const connL = (ids, yFn, xFrom, xTo, color) => ids.map((_, i) => React.createElement(Conn, {
-    key: `cl-${i}`,
-    x1: xFrom + CW,
-    y1: yFn(i),
-    x2: xTo,
-    y2: yR16(Math.floor(i / 2)),
+  const MatchLabel = ({
+    n,
+    x,
+    yc,
     color
-  }));
+  }) => React.createElement("text", {
+    x: x + CW + 2,
+    y: yc - 1,
+    fontSize: 7,
+    fill: `${color}88`,
+    fontFamily: "Segoe UI,system-ui,sans-serif",
+    fontWeight: 700
+  }, `M${n}`);
   return React.createElement("div", {
     style: {
       overflowX: "auto",
@@ -2070,7 +2169,7 @@ function BracketTab({
   }, React.createElement("div", {
     style: {
       textAlign: "center",
-      marginBottom: 16
+      marginBottom: 14
     }
   }, React.createElement("div", {
     style: {
@@ -2080,13 +2179,14 @@ function BracketTab({
       letterSpacing: 3,
       textTransform: "uppercase"
     }
-  }, "🏆 Tableau de la Phase Finale — Structure Officielle FIFA 2026"), React.createElement("div", {
+  }, "🏆 Tableau Phase Finale — Structure Officielle FIFA 2026"), React.createElement("div", {
     style: {
       fontSize: 10,
       color: "#4a6080",
-      marginTop: 4
+      marginTop: 4,
+      lineHeight: 1.6
     }
-  }, "France (gauche) · Norvège (droite) — ne peuvent se retrouver qu'en finale")), React.createElement("svg", {
+  }, "🇩🇪 All. vs 🇫🇷 Fra. possibles dès le 1/8 (M89) · 🇫🇷 Fra. et 🇳🇴 Nor. au plus tôt en demi-finale (M101)")), React.createElement("svg", {
     width: SVG_W,
     height: SVG_H,
     style: {
@@ -2095,90 +2195,135 @@ function BracketTab({
     },
     viewBox: `0 0 ${SVG_W} ${SVG_H}`
   },
-  // ── R32 GAUCHE ──
-  ...LEFT_R32.map((id, i) => {
-    const m = OFFICIAL_R32[id] || {};
-    return React.createElement(Match, {
-      key: id,
-      id,
-      eq1: m.eq1,
-      eq2: m.eq2,
-      x: xL0,
-      yc: yR32(i),
-      color: TC.r32
-    });
-  }),
+  // ── R32 GAUCHE (ordre : M74, M77, M73, M75, M76, M78, M79, M80) ──
+  ...LEFT_R32_ORDER.map((n, i) => React.createElement(Match2, {
+    key: `r32l-${n}`,
+    matchId: `M${n}`,
+    eq1: M[n].eq1,
+    eq2: M[n].eq2,
+    x: xL0,
+    yc: yR32(i),
+    color: TC.r32
+  })),
+  // Labels
+  ...LEFT_R32_ORDER.map((n, i) => React.createElement(MatchLabel, {
+    key: `lbl32l-${n}`,
+    n,
+    x: xL0,
+    yc: yR32(i),
+    color: TC.r32
+  })),
   // Connecteurs R32→R16 gauche
-  ...LEFT_R32.map((_, i) => React.createElement(Conn, {
-    key: `clA-${i}`,
+  // M89: M74(0)+M77(1), M90: M73(2)+M75(3), M91: M76(4)+M78(5), M92: M79(6)+M80(7)
+  ...[0, 1, 2, 3, 4, 5, 6, 7].map(i => React.createElement(Conn, {
+    key: `cL32-${i}`,
     x1: xL0 + CW,
     y1: yR32(i),
     x2: xL1,
-    y2: yR16(Math.floor(i / 2)),
+    y2: yR16_L(Math.floor(i / 2)),
     color: TC.r32
   })),
-  // ── R16 GAUCHE ──
-  ...R16_L.map((m, i) => React.createElement(Match, {
+  // R16 GAUCHE
+  ...R16_L.map((m, i) => React.createElement(Match2, {
     key: m.id,
-    id: m.id,
+    matchId: m.id,
     eq1: m.eq1 || "À déterm.",
     eq2: m.eq2 || "À déterm.",
     x: xL1,
-    yc: yR16(i),
+    yc: yR16_L(i),
     color: TC.r16
-  })), ...R16_L.map((_, i) => React.createElement(Conn, {
-    key: `clB-${i}`,
-    x1: xL1 + CW,
-    y1: yR16(i),
-    x2: xL2,
-    y2: yQF(Math.floor(i / 2)),
+  })), ...R16_L.map((m, i) => React.createElement(MatchLabel, {
+    key: `lbl16l-${i}`,
+    n: m.n,
+    x: xL1,
+    yc: yR16_L(i),
     color: TC.r16
   })),
-  // ── QF GAUCHE ──
-  ...QF_L.map((m, i) => React.createElement(Match, {
+  // Connecteurs R16→QF gauche
+  ...[0, 1, 2, 3].map(i => React.createElement(Conn, {
+    key: `cL16-${i}`,
+    x1: xL1 + CW,
+    y1: yR16_L(i),
+    x2: xL2,
+    y2: yQF_L(Math.floor(i / 2)),
+    color: TC.r16
+  })),
+  // QF GAUCHE
+  ...QF_L.map((m, i) => React.createElement(Match2, {
     key: m.id,
-    id: m.id,
+    matchId: m.id,
     eq1: m.eq1 || "À déterm.",
     eq2: m.eq2 || "À déterm.",
     x: xL2,
-    yc: yQF(i),
+    yc: yQF_L(i),
     color: TC.qf
-  })), React.createElement(Conn, {
-    key: "clC-0",
-    x1: xL2 + CW,
-    y1: yQF(0),
-    x2: xL3,
-    y2: ySF(0),
+  })), React.createElement(MatchLabel, {
+    key: "lbl97",
+    n: 97,
+    x: xL2,
+    yc: yQF_L(0),
     color: TC.qf
-  }), React.createElement(Conn, {
-    key: "clC-1",
-    x1: xL2 + CW,
-    y1: yQF(1),
-    x2: xL3,
-    y2: ySF(0),
+  }), React.createElement(MatchLabel, {
+    key: "lbl98",
+    n: 98,
+    x: xL2,
+    yc: yQF_L(1),
     color: TC.qf
   }),
-  // ── SF GAUCHE (SF-1) ──
-  React.createElement(Match, {
-    key: "SF-1",
-    id: "SF-1",
-    eq1: SF[0].eq1 || "À déterm.",
-    eq2: SF[0].eq2 || "À déterm.",
-    x: xL3,
-    yc: ySF(0),
-    color: TC.sf
+  // Connecteurs QF→SF gauche
+  React.createElement(Conn, {
+    key: "cL97",
+    x1: xL2 + CW,
+    y1: yQF_L(0),
+    x2: xL3,
+    y2: ySF_L(),
+    color: TC.qf
   }), React.createElement(Conn, {
-    key: "clD",
+    key: "cL98",
+    x1: xL2 + CW,
+    y1: yQF_L(1),
+    x2: xL3,
+    y2: ySF_L(),
+    color: TC.qf
+  }),
+  // SF GAUCHE (M101)
+  React.createElement(Match2, {
+    key: "M101",
+    matchId: "M101",
+    eq1: SF1.eq1 || "À déterm.",
+    eq2: SF1.eq2 || "À déterm.",
+    x: xL3,
+    yc: ySF_L(),
+    color: TC.sf
+  }), React.createElement(MatchLabel, {
+    key: "lbl101",
+    n: 101,
+    x: xL3,
+    yc: ySF_L(),
+    color: TC.sf
+  }),
+  // Connecteur SF→FIN gauche
+  React.createElement(Conn, {
+    key: "cSF1",
     x1: xL3 + CW,
-    y1: ySF(0),
+    y1: ySF_L(),
     x2: xFIN,
     y2: yFIN - CH / 2 - GAP / 2 - CH / 2,
     color: TC.sf
   }),
   // ── FINALE au centre ──
-  React.createElement("text", {
-    x: xFIN + CW / 2,
+  React.createElement("rect", {
+    x: xFIN - 2,
     y: yFIN - 50,
+    width: CW + 4,
+    height: 106,
+    rx: 6,
+    fill: "#0a0f1e",
+    stroke: "#c0b03766",
+    strokeWidth: 2
+  }), React.createElement("text", {
+    x: xFIN + CW / 2,
+    y: yFIN - 36,
     textAnchor: "middle",
     fontSize: 9,
     fontWeight: 800,
@@ -2187,14 +2332,16 @@ function BracketTab({
     letterSpacing: 2
   }, "🏆 FINALE"), React.createElement("text", {
     x: xFIN + CW / 2,
-    y: yFIN - 38,
+    y: yFIN - 24,
     textAnchor: "middle",
-    fontSize: 8,
+    fontSize: 7.5,
     fill: "#5a6070",
     fontFamily: "Segoe UI,system-ui,sans-serif"
-  }, "19 juil · MetLife Stadium"), React.createElement("rect", {
+  }, "19 juil · MetLife Stadium · New York"),
+  // Carte FIN eq1
+  React.createElement("rect", {
     x: xFIN,
-    y: yFIN - 30,
+    y: yFIN - 16,
     width: CW,
     height: CH,
     rx: 4,
@@ -2203,28 +2350,30 @@ function BracketTab({
     strokeWidth: isWin("FIN", 1) ? 2 : 1
   }), React.createElement("text", {
     x: xFIN + 6,
-    y: yFIN - 30 + CH / 2 + 4,
+    y: yFIN - 16 + CH / 2 + 4,
     fontSize: 9.5,
     fill: FIN_eq1 ? isWin("FIN", 1) ? "#fff" : "#c8d0e0" : "#3a4a5a",
     fontWeight: isWin("FIN", 1) ? 800 : 400,
     fontFamily: "Segoe UI,system-ui,sans-serif",
     fontStyle: FIN_eq1 ? "normal" : "italic"
-  }, FIN_eq1 ? FIN_eq1.length > 17 ? FIN_eq1.slice(0, 16) + "…" : FIN_eq1 : "À déterm."), scores["FIN"]?.g1 !== '' && scores["FIN"]?.g2 !== '' && React.createElement("text", {
+  }, FIN_eq1 ? FIN_eq1.length > 17 ? FIN_eq1.slice(0, 16) + "…" : FIN_eq1 : "À déterm."), sc("FIN").g1 !== '' && sc("FIN").g2 !== '' && React.createElement("text", {
     x: xFIN + CW - 14,
-    y: yFIN - 30 + CH / 2 + 4,
+    y: yFIN - 16 + CH / 2 + 4,
     fontSize: 10,
     fontWeight: 800,
     textAnchor: "middle",
     fill: isWin("FIN", 1) ? "#c0b037" : "#6b7280",
     fontFamily: "Segoe UI,system-ui,sans-serif"
-  }, scores["FIN"]?.g1), React.createElement("line", {
+  }, sc("FIN").g1), React.createElement("line", {
     x1: xFIN + 4,
-    y1: yFIN,
+    y1: yFIN + GAP / 2 - 2,
     x2: xFIN + CW - 4,
-    y2: yFIN,
+    y2: yFIN + GAP / 2 - 2,
     stroke: "#c0b03733",
     strokeWidth: 1
-  }), React.createElement("rect", {
+  }),
+  // Carte FIN eq2
+  React.createElement("rect", {
     x: xFIN,
     y: yFIN + GAP / 2,
     width: CW,
@@ -2241,7 +2390,7 @@ function BracketTab({
     fontWeight: isWin("FIN", 2) ? 800 : 400,
     fontFamily: "Segoe UI,system-ui,sans-serif",
     fontStyle: FIN_eq2 ? "normal" : "italic"
-  }, FIN_eq2 ? FIN_eq2.length > 17 ? FIN_eq2.slice(0, 16) + "…" : FIN_eq2 : "À déterm."), scores["FIN"]?.g1 !== '' && scores["FIN"]?.g2 !== '' && React.createElement("text", {
+  }, FIN_eq2 ? FIN_eq2.length > 17 ? FIN_eq2.slice(0, 16) + "…" : FIN_eq2 : "À déterm."), sc("FIN").g1 !== '' && sc("FIN").g2 !== '' && React.createElement("text", {
     x: xFIN + CW - 14,
     y: yFIN + GAP / 2 + CH / 2 + 4,
     fontSize: 10,
@@ -2249,19 +2398,19 @@ function BracketTab({
     textAnchor: "middle",
     fill: isWin("FIN", 2) ? "#c0b037" : "#6b7280",
     fontFamily: "Segoe UI,system-ui,sans-serif"
-  }, scores["FIN"]?.g2),
-  // Petite finale
+  }, sc("FIN").g2),
+  // Petite finale M103
   React.createElement("text", {
     x: xFIN + CW / 2,
-    y: yFIN + 80,
+    y: yFIN + 82,
     textAnchor: "middle",
     fontSize: 8,
     fontWeight: 700,
     fill: "#27ae60",
     fontFamily: "Segoe UI,system-ui,sans-serif"
-  }, "3e PLACE · 18 juil"), React.createElement("rect", {
+  }, "3e PLACE (M103) · 18 juil · Miami"), React.createElement("rect", {
     x: xFIN,
-    y: yFIN + 88,
+    y: yFIN + 90,
     width: CW,
     height: CH,
     rx: 4,
@@ -2270,14 +2419,14 @@ function BracketTab({
     strokeWidth: 1
   }), React.createElement("text", {
     x: xFIN + 6,
-    y: yFIN + 88 + CH / 2 + 4,
+    y: yFIN + 90 + CH / 2 + 4,
     fontSize: 9,
     fill: P3_eq1 ? "#c8d0e0" : "#3a4a5a",
     fontFamily: "Segoe UI,system-ui,sans-serif",
     fontStyle: P3_eq1 ? "normal" : "italic"
-  }, P3_eq1 ? P3_eq1.length > 17 ? P3_eq1.slice(0, 16) + "…" : P3_eq1 : "Perd. SF-1"), React.createElement("rect", {
+  }, P3_eq1 ? P3_eq1.length > 17 ? P3_eq1.slice(0, 16) + "…" : P3_eq1 : "Perd. M101"), React.createElement("rect", {
     x: xFIN,
-    y: yFIN + 88 + CH + 4,
+    y: yFIN + 90 + CH + 4,
     width: CW,
     height: CH,
     rx: 4,
@@ -2286,93 +2435,147 @@ function BracketTab({
     strokeWidth: 1
   }), React.createElement("text", {
     x: xFIN + 6,
-    y: yFIN + 88 + CH + 4 + CH / 2 + 4,
+    y: yFIN + 90 + CH + 4 + CH / 2 + 4,
     fontSize: 9,
     fill: P3_eq2 ? "#c8d0e0" : "#3a4a5a",
     fontFamily: "Segoe UI,system-ui,sans-serif",
     fontStyle: P3_eq2 ? "normal" : "italic"
-  }, P3_eq2 ? P3_eq2.length > 17 ? P3_eq2.slice(0, 16) + "…" : P3_eq2 : "Perd. SF-2"),
-  // ── SF DROITE (SF-2) ──
+  }, P3_eq2 ? P3_eq2.length > 17 ? P3_eq2.slice(0, 16) + "…" : P3_eq2 : "Perd. M102"),
+  // Connecteur SF→FIN droit
   React.createElement(Conn, {
-    key: "crD",
+    key: "cSF2",
     x1: xR3,
-    y1: ySF(1),
+    y1: ySF_R(),
     x2: xFIN + CW,
     y2: yFIN,
     color: TC.sf
-  }), React.createElement(Match, {
-    key: "SF-2",
-    id: "SF-2",
-    eq1: SF[1].eq1 || "À déterm.",
-    eq2: SF[1].eq2 || "À déterm.",
+  }),
+  // SF DROITE (M102)
+  React.createElement(Match2, {
+    key: "M102",
+    matchId: "M102",
+    eq1: SF2.eq1 || "À déterm.",
+    eq2: SF2.eq2 || "À déterm.",
     x: xR3,
-    yc: ySF(1),
+    yc: ySF_R(),
+    color: TC.sf
+  }), React.createElement(MatchLabel, {
+    key: "lbl102",
+    n: 102,
+    x: xR3,
+    yc: ySF_R(),
     color: TC.sf
   }),
-  // ── QF DROITE ──
+  // Connecteurs QF→SF droite
   React.createElement(Conn, {
-    key: "crC-0",
+    key: "cR99",
     x1: xR2 + CW,
-    y1: yQF(2),
+    y1: yQF_R(0),
     x2: xR3,
-    y2: ySF(1),
+    y2: ySF_R(),
     color: TC.qf
   }), React.createElement(Conn, {
-    key: "crC-1",
+    key: "cR100",
     x1: xR2 + CW,
-    y1: yQF(3),
+    y1: yQF_R(1),
     x2: xR3,
-    y2: ySF(1),
+    y2: ySF_R(),
     color: TC.qf
-  }), ...QF_R.map((m, i) => React.createElement(Match, {
+  }),
+  // QF DROITE
+  ...QF_R.map((m, i) => React.createElement(Match2, {
     key: m.id,
-    id: m.id,
+    matchId: m.id,
     eq1: m.eq1 || "À déterm.",
     eq2: m.eq2 || "À déterm.",
     x: xR2,
-    yc: yQF(i + 2),
+    yc: yQF_R(i),
     color: TC.qf
-  })),
-  // ── R16 DROITE ──
-  ...R16_R.map((_, i) => React.createElement(Conn, {
-    key: `crB-${i}`,
+  })), React.createElement(MatchLabel, {
+    key: "lbl99",
+    n: 99,
+    x: xR2,
+    yc: yQF_R(0),
+    color: TC.qf
+  }), React.createElement(MatchLabel, {
+    key: "lbl100",
+    n: 100,
+    x: xR2,
+    yc: yQF_R(1),
+    color: TC.qf
+  }),
+  // Connecteurs R16→QF droite
+  ...[0, 1, 2, 3].map(i => React.createElement(Conn, {
+    key: `cR16-${i}`,
     x1: xR1 + CW,
-    y1: yR16(i + 4),
+    y1: yR16_R(i),
     x2: xR2,
-    y2: yQF(Math.floor(i / 2) + 2),
+    y2: yQF_R(Math.floor(i / 2)),
     color: TC.r16
-  })), ...R16_R.map((m, i) => React.createElement(Match, {
+  })),
+  // R16 DROITE (ordre: M93, M94, M95, M96 de haut en bas)
+  ...R16_R.map((m, i) => React.createElement(Match2, {
     key: m.id,
-    id: m.id,
+    matchId: m.id,
     eq1: m.eq1 || "À déterm.",
     eq2: m.eq2 || "À déterm.",
     x: xR1,
-    yc: yR16(i + 4),
+    yc: yR16_R(i),
+    color: TC.r16
+  })), ...R16_R.map((m, i) => React.createElement(MatchLabel, {
+    key: `lbl16r-${i}`,
+    n: m.n,
+    x: xR1,
+    yc: yR16_R(i),
     color: TC.r16
   })),
-  // ── R32 DROITE ──
-  ...RIGHT_R32.map((_, i) => React.createElement(Conn, {
-    key: `crA-${i}`,
+  // Connecteurs R32→R16 droite
+  // M93: M84(0)+M83(1), M94: M81(4-mais idx2)+M82(5-idx3), M95: M86(2-idx4)+M88(3-idx5) hmm non
+  // RIGHT_R32_ORDER = [84,83,86,88,81,82,87,85]
+  // M93=W84[0]+W83[1]→R16[0], M94=W81[4]+W82[5]→R16[1] ... non: M94=W81+W82
+  // Idx: 84=0,83=1,86=2,88=3,81=4,82=5,87=6,85=7
+  // M93=W[0]+W[1]→R16[0], M94=W[4]+W[5]→R16[1], M95=W[2]+W[3]→R16[2], M96=W[7]+W[6]→R16[3]
+  // Mais les connexions visuelles doivent relier le bon R32 à son R16
+  // M93 (R16[0]) ← M84[0] et M83[1]
+  // M94 (R16[1]) ← M81[4] et M82[5]
+  // M95 (R16[2]) ← M86[2] et M88[3]
+  // M96 (R16[3]) ← M85[7] et M87[6]
+  ...[[0, 0], [1, 0],
+  // M84,M83 → M93 (R16[0])
+  [2, 2], [3, 2],
+  // M86,M88 → M95 (R16[2])
+  [4, 1], [5, 1],
+  // M81,M82 → M94 (R16[1])
+  [6, 3], [7, 3] // M87,M85 → M96 (R16[3])
+  ].map(([r32idx, r16idx], i) => React.createElement(Conn, {
+    key: `cR32r-${i}`,
     x1: xR0 + CW,
-    y1: yR32(i),
+    y1: yR32(r32idx),
     x2: xR1,
-    y2: yR16(Math.floor(i / 2) + 4),
+    y2: yR16_R(r16idx),
     color: TC.r32
-  })), ...RIGHT_R32.map((id, i) => {
-    const m = OFFICIAL_R32[id] || {};
-    return React.createElement(Match, {
-      key: id,
-      id,
-      eq1: m.eq1,
-      eq2: m.eq2,
-      x: xR0,
-      yc: yR32(i),
-      color: TC.r32
-    });
-  }),
+  })),
+  // R32 DROITE (ordre visuel: M84,M83,M86,M88,M81,M82,M87,M85 haut→bas)
+  ...RIGHT_R32_ORDER.map((n, i) => React.createElement(Match2, {
+    key: `r32r-${n}`,
+    matchId: `M${n}`,
+    eq1: M[n].eq1,
+    eq2: M[n].eq2,
+    x: xR0,
+    yc: yR32(i),
+    color: TC.r32
+  })), ...RIGHT_R32_ORDER.map((n, i) => React.createElement("text", {
+    key: `lbl32r-${n}`,
+    x: xR0 - 18,
+    y: yR32(i) + 3,
+    fontSize: 7,
+    fill: `${TC.r32}88`,
+    fontFamily: "Segoe UI,system-ui,sans-serif",
+    fontWeight: 700
+  }, `M${n}`)),
   // Légendes colonnes
   ...[[xL0 + CW / 2, SVG_H - 8, "1/16", TC.r32], [xL1 + CW / 2, SVG_H - 8, "1/8", TC.r16], [xL2 + CW / 2, SVG_H - 8, "1/4", TC.qf], [xL3 + CW / 2, SVG_H - 8, "1/2", TC.sf], [xFIN + CW / 2, SVG_H - 8, "FIN", TC.fin], [xR3 + CW / 2, SVG_H - 8, "1/2", TC.sf], [xR2 + CW / 2, SVG_H - 8, "1/4", TC.qf], [xR1 + CW / 2, SVG_H - 8, "1/8", TC.r16], [xR0 + CW / 2, SVG_H - 8, "1/16", TC.r32]].map(([x, y, label, color], i) => React.createElement("text", {
-    key: `lb-${i}`,
+    key: `lbcol-${i}`,
     x,
     y,
     textAnchor: "middle",
@@ -2383,6 +2586,8 @@ function BracketTab({
     letterSpacing: 1
   }, label))));
 }
+
+
 
 
 
