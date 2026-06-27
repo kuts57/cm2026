@@ -1679,384 +1679,277 @@ try {
   }
 
   // ─── COMPOSANT AGENDA ────────────────────────────────────────────────────────
-  // ─── COMPOSANT BRACKET V3 — Structure officielle FIFA 2026 (source: FIFA/Wikipedia) ─
-// ─── BRACKET OFFICIEL FIFA 2026 — SOURCE : FIFA / L'ÉQUIPE / WIKIPEDIA ────────
-// Matchs 73-88 : 1/16 de finale
-// Matchs 89-96 : 1/8 de finale  
-// Matchs 97-100: Quarts de finale
-// Matchs 101-102: Demi-finales
-// Match 103: Petite finale | Final: 19 juillet
+  // ─── COMPOSANT BRACKET V4 — ES5 pur, sans template literals, sans arrow fn ─────
+function BracketTab(props) {
+  var scores = props.scores;
 
-function BracketTab({
-  scores,
-  thirds
-}) {
-  // Mapping IDs FIFA (M73..M102+FIN+3PL) → IDs scores de l'appli (R32-1..R32-16, R16-1..R16-8, etc.)
-  // LEFT_R32_ORDER = [74,77,73,75,76,78,79,80] → R32-3,R32-6,R32-1,R32-2,R32-4,R32-5,R32-7,R32-8
-  // RIGHT_R32_ORDER= [84,83,86,88,81,82,87,85] → R32-15,R32-11,R32-15... non, voir mapping réel:
-  // M73=R32-1(AfSud/Can), M74=R32-3(All/3e), M75=R32-2(PB/Maroc->1erF vs 2eC... non)
-  // Pour simplifier: on crée un alias direct match FIFA→appli IDs
-  const FIFA_TO_APP = {
-    // R32 (1/16)
-    "M73": "R32-1",  "M74": "R32-3",  "M75": "R32-4",  "M76": "R32-2",
-    "M77": "R32-6",  "M78": "R32-5",  "M79": "R32-7",  "M80": "R32-8",
-    "M81": "R32-10", "M82": "R32-9",  "M83": "R32-12", "M84": "R32-11",
-    "M85": "R32-13", "M86": "R32-16", "M87": "R32-15", "M88": "R32-14",
-    // R16 (1/8)
-    "M89": "R16-2",  "M90": "R16-1",  "M91": "R16-3",  "M92": "R16-4",
-    "M93": "R16-6",  "M94": "R16-5",  "M95": "R16-8",  "M96": "R16-7",
-    // QF
-    "M97": "QF-1",   "M98": "QF-2",   "M99": "QF-3",   "M100":"QF-4",
-    // SF + finale
-    "M101":"SF-1",   "M102":"SF-2",   "FIN": "FIN",    "M103":"3PL",
+  // Mapping IDs FIFA → IDs scores appli
+  var FIFA_TO_APP = {
+    "M73": "R32-1",
+    "M74": "R32-3",
+    "M75": "R32-4",
+    "M76": "R32-2",
+    "M77": "R32-6",
+    "M78": "R32-5",
+    "M79": "R32-7",
+    "M80": "R32-8",
+    "M81": "R32-10",
+    "M82": "R32-9",
+    "M83": "R32-12",
+    "M84": "R32-11",
+    "M85": "R32-13",
+    "M86": "R32-16",
+    "M87": "R32-15",
+    "M88": "R32-14",
+    "M89": "R16-2",
+    "M90": "R16-1",
+    "M91": "R16-3",
+    "M92": "R16-4",
+    "M93": "R16-6",
+    "M94": "R16-5",
+    "M95": "R16-8",
+    "M96": "R16-7",
+    "M97": "QF-1",
+    "M98": "QF-2",
+    "M99": "QF-3",
+    "M100": "QF-4",
+    "M101": "SF-1",
+    "M102": "SF-2",
+    "FIN": "FIN",
+    "M103": "3PL"
   };
-  // Fonction qui lit le score avec l'ID de l'appli (function hoistée pour compatibilité Safari)
-  function sc(fifaId) { return scores[FIFA_TO_APP[fifaId]] || {g1:"",g2:""}; }
-
-  // ── 16 matchs officiels du 1/16 ────────────────────────────────────────────
-  const M = {
-    73: {
-      eq1: "🇿🇦 Afrique du Sud",
-      eq2: "🇨🇦 Canada",
-      date: "28 juin",
-      h: "21h00"
-    },
-    74: {
-      eq1: "🇩🇪 Allemagne",
-      eq2: "3e Gr.A/B/C/D/F",
-      date: "29 juin",
-      h: "22h30"
-    },
-    75: {
-      eq1: "🇳🇱 Pays-Bas",
-      eq2: "🇲🇦 Maroc",
-      date: "30 juin",
-      h: "02h00"
-    },
-    76: {
-      eq1: "🇧🇷 Brésil",
-      eq2: "🇯🇵 Japon",
-      date: "29 juin",
-      h: "19h00"
-    },
-    77: {
-      eq1: "🇫🇷 France",
-      eq2: "3e Gr.C/D/F/G/H",
-      date: "30 juin",
-      h: "23h00"
-    },
-    78: {
-      eq1: "🇨🇮 Côte d'Ivoire",
-      eq2: "🇳🇴 Norvège",
-      date: "30 juin",
-      h: "19h00"
-    },
-    79: {
-      eq1: "🇲🇽 Mexique",
-      eq2: "3e Gr.C/E/F/H/I",
-      date: "1er juil",
-      h: "04h00"
-    },
-    80: {
-      eq1: "🏴 Angleterre",
-      eq2: "3e Gr.E/H/I/J/K",
-      date: "1er juil",
-      h: "23h00"
-    },
-    81: {
-      eq1: "🇺🇸 États-Unis",
-      eq2: "🇧🇦 Bosnie-Herz.",
-      date: "2 juil",
-      h: "07h00"
-    },
-    82: {
-      eq1: "🇪🇬 Égypte",
-      eq2: "3e Gr.A/E/H/I/J",
-      date: "1er juil",
-      h: "01h00"
-    },
-    83: {
-      eq1: "🇵🇹 Portugal",
-      eq2: "🇬🇭 Ghana",
-      date: "3 juil",
-      h: "02h00"
-    },
-    84: {
-      eq1: "🇪🇸 Espagne",
-      eq2: "🇦🇹 Autriche",
-      date: "3 juil",
-      h: "02h00"
-    },
-    85: {
-      eq1: "🇨🇭 Suisse",
-      eq2: "3e Gr.E/F/G/I/J",
-      date: "3 juil",
-      h: "05h00"
-    },
-    86: {
-      eq1: "🇦🇷 Argentine",
-      eq2: "🇺🇾 Uruguay",
-      date: "4 juil",
-      h: "05h00"
-    },
-    87: {
-      eq1: "🇨🇴 Colombie",
-      eq2: "3e Gr.D/E/I/J/L",
-      date: "4 juil",
-      h: "08h00"
-    },
-    88: {
-      eq1: "🇦🇺 Australie",
-      eq2: "🇮🇷 Iran",
-      date: "4 juil",
-      h: "05h00"
-    }
-  };
-
-  // ── Structure officielle 1/8 (matches 89-96) ────────────────────────────────
-  // M89 = W74 vs W77  (Allemagne/France zone → Philadelphie 4 juil)
-  // M90 = W73 vs W75  (AfSud+Can / PB+Maroc → Houston 4 juil)
-  // M91 = W76 vs W78  (Brésil+Jap / CdI+Nor → New York 5 juil)
-  // M92 = W79 vs W80  (Mexique / Angleterre → Mexico City 6 juil)
-  // M93 = W83 vs W84  (Port / Espagne → Dallas 6 juil)
-  // M94 = W81 vs W82  (USA / Egypte → Seattle 7 juil)
-  // M95 = W86 vs W88  (Argentine / Australie → Atlanta 7 juil)
-  // M96 = W85 vs W87  (Suisse / Colombie → Vancouver 7 juil)
-
-  // ── Structure 1/4 (97-100) ──────────────────────────────────────────────────
-  // M97 = W89 vs W90  (Alli/Fra zone vs AfSud/PB zone → Boston)
-  // M98 = W91 vs W92  (Brésil/CdI zone vs Mexique/Ang zone → NY)
-  // M99 = W93 vs W94  (Port/Esp zone vs USA/Eg zone → Dallas)
-  // M100= W95 vs W96  (Argentine zone vs Suisse/Col zone → Miami)
-
-  // ── Demis ────────────────────────────────────────────────────────────────────
-  // M101= W97 vs W98  (côté Europe/Amérique du Sud haut)
-  // M102= W99 vs W100 (côté Amériques bas)
-
-  // ── Organisation visuelle : 8 colonnes de gauche à droite ───────────────────
-  // CÔTÉ GAUCHE (→ M101):
-  //   Col 0 (1/16): M74, M73, M77, M75, M76, M78, M79, M80 (ordre haut→bas bracket)
-  //     Paires R16: M74+M77→M89, M73+M75→M90, M76+M78→M91, M79+M80→M92
-  //   Col 1 (1/8):  M89, M90, M91, M92
-  //     Paires QF:  M89+M90→M97, M91+M92→M98
-  //   Col 2 (QF):   M97, M98
-  //   Col 3 (SF):   M101
-
-  // CÔTÉ DROIT (→ M102):
-  //   Col 8 (1/16): M84, M83, M86, M88, M81, M82, M87, M85
-  //     Paires R16: M83+M84→M93, M81+M82→M94, M86+M88→M95, M85+M87→M96
-  //   Col 7 (1/8):  M93, M94, M95, M96
-  //     Paires QF:  M93+M94→M99, M95+M96→M100
-  //   Col 6 (QF):   M99, M100
-  //   Col 5 (SF):   M102
-
-  // Ordre visuel gauche (de haut en bas) : M74, M77, M73, M75, M76, M78, M79, M80
-  const LEFT_R32_ORDER = [74, 77, 73, 75, 76, 78, 79, 80];
-  // Ordre visuel droit  (de haut en bas) : M84, M83, M86, M88, M81, M82, M87, M85
-  const RIGHT_R32_ORDER = [84, 83, 86, 88, 81, 82, 87, 85];
-
-  // Paires 1/8 gauche (index dans LEFT_R32_ORDER)
-  // M89: W(M74[0]) vs W(M77[1]) → 1/8 position 0
-  // M90: W(M73[2]) vs W(M75[3]) → 1/8 position 1
-  // M91: W(M76[4]) vs W(M78[5]) → 1/8 position 2
-  // M92: W(M79[6]) vs W(M80[7]) → 1/8 position 3
-  const R16_L = [{
-    id: "M89",
-    n: 89,
-    eq1: null,
-    eq2: null,
-    src: [74, 77],
-    date: "4 juil",
-    h: "21h00",
-    city: "Philadelphie"
-  }, {
-    id: "M90",
-    n: 90,
-    eq1: null,
-    eq2: null,
-    src: [73, 75],
-    date: "4 juil",
-    h: "21h00",
-    city: "Houston"
-  }, {
-    id: "M91",
-    n: 91,
-    eq1: null,
-    eq2: null,
-    src: [76, 78],
-    date: "5 juil",
-    h: "20h00",
-    city: "New York"
-  }, {
-    id: "M92",
-    n: 92,
-    eq1: null,
-    eq2: null,
-    src: [79, 80],
-    date: "6 juil",
-    h: "02h00",
-    city: "Mexico City"
-  }];
-  // Paires 1/8 droit
-  // M93: W(M83[1]) vs W(M84[0]) → 1/8 position 0
-  // M94: W(M81[4]) vs W(M82[5]) → 1/8 position 1
-  // M95: W(M86[2]) vs W(M88[3]) → 1/8 position 2
-  // M96: W(M85[7]) vs W(M87[6]) → 1/8 position 3
-  const R16_R = [{
-    id: "M93",
-    n: 93,
-    eq1: null,
-    eq2: null,
-    src: [83, 84],
-    date: "6 juil",
-    h: "21h00",
-    city: "Dallas"
-  }, {
-    id: "M94",
-    n: 94,
-    eq1: null,
-    eq2: null,
-    src: [81, 82],
-    date: "7 juil",
-    h: "01h00",
-    city: "Seattle"
-  }, {
-    id: "M95",
-    n: 95,
-    eq1: null,
-    eq2: null,
-    src: [86, 88],
-    date: "7 juil",
-    h: "21h00",
-    city: "Atlanta"
-  }, {
-    id: "M96",
-    n: 96,
-    eq1: null,
-    eq2: null,
-    src: [85, 87],
-    date: "8 juil",
-    h: "03h30",
-    city: "Vancouver"
-  }];
-
-  // ── Résolution des équipes ───────────────────────────────────────────────────
-  function getScore(id) { return sc(id); }
+  function sc(fifaId) {
+    var appId = FIFA_TO_APP[fifaId];
+    return appId && scores[appId] ? scores[appId] : {
+      g1: "",
+      g2: ""
+    };
+  }
   function wonMatch(id, eq1, eq2) {
-    const s = sc(id);
-    const g1 = parseInt(s.g1, 10),
+    var s = sc(id);
+    var g1 = parseInt(s.g1, 10),
       g2 = parseInt(s.g2, 10);
     if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return null;
     if (g1 === g2) return null;
     return g1 > g2 ? eq1 : eq2;
-  };
+  }
   function lostMatch(id, eq1, eq2) {
-    const s = sc(id);
-    const g1 = parseInt(s.g1, 10),
+    var s = sc(id);
+    var g1 = parseInt(s.g1, 10),
       g2 = parseInt(s.g2, 10);
     if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return null;
     if (g1 === g2) return null;
     return g1 > g2 ? eq2 : eq1;
-  };
-  function isWin(id, side) {
-    const s = sc(id);
-    const g1 = parseInt(s.g1, 10),
+  }
+  function isWin(fifaId, side) {
+    var s = sc(fifaId);
+    var g1 = parseInt(s.g1, 10),
       g2 = parseInt(s.g2, 10);
     if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return false;
     return side === 1 ? g1 > g2 : g2 > g1;
+  }
+
+  // Données des 16 matchs du 1/16
+  var ML = {
+    73: {
+      eq1: "🇿🇦 Afrique du Sud",
+      eq2: "🇨🇦 Canada"
+    },
+    74: {
+      eq1: "🇩🇪 Allemagne",
+      eq2: "3e Gr.A/B/C/D/F"
+    },
+    75: {
+      eq1: "🇳🇱 Pays-Bas",
+      eq2: "🇲🇦 Maroc"
+    },
+    76: {
+      eq1: "🇧🇷 Brésil",
+      eq2: "🇯🇵 Japon"
+    },
+    77: {
+      eq1: "🇫🇷 France",
+      eq2: "3e Gr.C/D/F/G/H"
+    },
+    78: {
+      eq1: "🇨🇮 Côte d'Ivoire",
+      eq2: "🇳🇴 Norvège"
+    },
+    79: {
+      eq1: "🇲🇽 Mexique",
+      eq2: "3e Gr.C/E/F/H/I"
+    },
+    80: {
+      eq1: "🏴 Angleterre",
+      eq2: "3e Gr.E/H/I/J/K"
+    },
+    81: {
+      eq1: "🇺🇸 États-Unis",
+      eq2: "🇧🇦 Bosnie-Herz."
+    },
+    82: {
+      eq1: "🇪🇬 Égypte",
+      eq2: "3e Gr.A/E/H/I/J"
+    },
+    83: {
+      eq1: "🇵🇹 Portugal",
+      eq2: "🇬🇭 Ghana"
+    },
+    84: {
+      eq1: "🇪🇸 Espagne",
+      eq2: "🇦🇹 Autriche"
+    },
+    85: {
+      eq1: "🇨🇭 Suisse",
+      eq2: "3e Gr.E/F/G/I/J"
+    },
+    86: {
+      eq1: "🇦🇷 Argentine",
+      eq2: "🇺🇾 Uruguay"
+    },
+    87: {
+      eq1: "🇨🇴 Colombie",
+      eq2: "3e Gr.D/E/I/J/L"
+    },
+    88: {
+      eq1: "🇦🇺 Australie",
+      eq2: "🇮🇷 Iran"
+    }
   };
+  function w32(n) {
+    return wonMatch("M" + n, ML[n].eq1, ML[n].eq2);
+  }
 
-  // Résoudre vainqueurs des R32
-  function wR32(n) { return wonMatch(`M${n}`, M[n].eq1, M[n].eq2); }
-
-  // Remplir R16
-  R16_L.forEach(m => {
-    m.eq1 = wR32(m.src[0]);
-    m.eq2 = wR32(m.src[1]);
-  });
-  R16_R.forEach(m => {
-    m.eq1 = wR32(m.src[0]);
-    m.eq2 = wR32(m.src[1]);
-  });
-  const wR16 = m => wonMatch(m.id, m.eq1, m.eq2);
-
-  // QF
-  const QF_L = [{
-    id: "M97",
-    eq1: wR16(R16_L[0]),
-    eq2: wR16(R16_L[1]),
-    date: "9 juil",
-    h: "21h00"
-  }, {
-    id: "M98",
-    eq1: wR16(R16_L[2]),
-    eq2: wR16(R16_L[3]),
-    date: "10 juil",
-    h: "21h00"
-  }];
-  const QF_R = [{
-    id: "M99",
-    eq1: wR16(R16_R[0]),
-    eq2: wR16(R16_R[1]),
-    date: "11 juil",
-    h: "21h00"
-  }, {
-    id: "M100",
-    eq1: wR16(R16_R[2]),
-    eq2: wR16(R16_R[3]),
-    date: "12 juil",
-    h: "21h00"
-  }];
-  const wQF = m => wonMatch(m.id, m.eq1, m.eq2);
-
-  // SF
-  const SF1 = {
-    id: "M101",
-    eq1: wQF(QF_L[0]),
-    eq2: wQF(QF_L[1]),
-    date: "14 juil",
-    h: "21h00"
+  // 1/8 officiels (source FIFA/Wikipedia/L'Equipe)
+  // M89=W74+W77, M90=W73+W75, M91=W76+W78, M92=W79+W80
+  // M93=W83+W84, M94=W81+W82, M95=W86+W88, M96=W85+W87
+  var r16 = {
+    89: {
+      eq1: w32(74),
+      eq2: w32(77)
+    },
+    90: {
+      eq1: w32(73),
+      eq2: w32(75)
+    },
+    91: {
+      eq1: w32(76),
+      eq2: w32(78)
+    },
+    92: {
+      eq1: w32(79),
+      eq2: w32(80)
+    },
+    93: {
+      eq1: w32(83),
+      eq2: w32(84)
+    },
+    94: {
+      eq1: w32(81),
+      eq2: w32(82)
+    },
+    95: {
+      eq1: w32(86),
+      eq2: w32(88)
+    },
+    96: {
+      eq1: w32(85),
+      eq2: w32(87)
+    }
   };
-  const SF2 = {
-    id: "M102",
-    eq1: wQF(QF_R[0]),
-    eq2: wQF(QF_R[1]),
-    date: "15 juil",
-    h: "21h00"
-  };
-  const FIN_eq1 = wonMatch("M101", SF1.eq1, SF1.eq2);
-  const FIN_eq2 = wonMatch("M102", SF2.eq1, SF2.eq2);
-  const P3_eq1 = lostMatch("M101", SF1.eq1, SF1.eq2);
-  const P3_eq2 = lostMatch("M102", SF2.eq1, SF2.eq2);
+  function w16(n) {
+    return wonMatch("M" + n, r16[n].eq1, r16[n].eq2);
+  }
 
-  // ── RENDU SVG ───────────────────────────────────────────────────────────────
-  const CW = 150,
+  // Quarts
+  // M97=W89+W90, M98=W91+W92, M99=W93+W94, M100=W95+W96
+  var qf = {
+    97: {
+      eq1: w16(89),
+      eq2: w16(90)
+    },
+    98: {
+      eq1: w16(91),
+      eq2: w16(92)
+    },
+    99: {
+      eq1: w16(93),
+      eq2: w16(94)
+    },
+    100: {
+      eq1: w16(95),
+      eq2: w16(96)
+    }
+  };
+  function wqf(n) {
+    return wonMatch("M" + n, qf[n].eq1, qf[n].eq2);
+  }
+
+  // Demis
+  // M101=W97+W98 (gauche), M102=W99+W100 (droite)
+  var sf = {
+    101: {
+      eq1: wqf(97),
+      eq2: wqf(98)
+    },
+    102: {
+      eq1: wqf(99),
+      eq2: wqf(100)
+    }
+  };
+  function wsf(n) {
+    return wonMatch("M" + n, sf[n].eq1, sf[n].eq2);
+  }
+  function lsf(n) {
+    return lostMatch("M" + n, sf[n].eq1, sf[n].eq2);
+  }
+  var FIN_eq1 = wsf(101),
+    FIN_eq2 = wsf(102);
+  var P3_eq1 = lsf(101),
+    P3_eq2 = lsf(102);
+
+  // ── Dimensions SVG ──────────────────────────────────────────────────────────
+  var CW = 150,
     CH = 26,
     GAP = 8;
-  const MH = 2 * CH + GAP + 10;
-  const BG = 16;
-  const TOTAL_H = 8 * MH + 7 * BG + 40;
-  const COL = 170;
-  const xL0 = 0,
+  var MH = 2 * CH + GAP + 10,
+    BG = 16;
+  var TOTAL_H = 8 * (MH + BG) + 40;
+  var COL = 170;
+  var xL0 = 0,
     xL1 = COL,
     xL2 = 2 * COL,
     xL3 = 3 * COL;
-  const xFIN = 4 * COL + CW / 2 - CW / 2 + 5;
-  const xR3 = xFIN + CW + COL * 0.5,
+  var xFIN = 4 * COL + 5;
+  var xR3 = xFIN + CW + COL * 0.5,
     xR2 = xR3 + COL,
     xR1 = xR2 + COL,
     xR0 = xR1 + COL;
-  const SVG_W = xR0 + CW + 10;
-  const SVG_H = TOTAL_H + 50;
-  const yR32 = i => i * (MH + BG) + MH / 2 + 20;
-  const yR16_L = i => (yR32(i * 2) + yR32(i * 2 + 1)) / 2;
-  const yQF_L = i => (yR16_L(i * 2) + yR16_L(i * 2 + 1)) / 2;
-  const ySF_L = () => (yQF_L(0) + yQF_L(1)) / 2;
-  const yR16_R = i => (yR32(i * 2) + yR32(i * 2 + 1)) / 2;
-  const yQF_R = i => (yR16_R(i * 2) + yR16_R(i * 2 + 1)) / 2;
-  const ySF_R = () => (yQF_R(0) + yQF_R(1)) / 2;
-  const yFIN = TOTAL_H / 2;
-  const TC = {
+  var SVG_W = xR0 + CW + 10,
+    SVG_H = TOTAL_H + 50;
+  function yR32(i) {
+    return i * (MH + BG) + MH / 2 + 20;
+  }
+  function yL16(i) {
+    return (yR32(i * 2) + yR32(i * 2 + 1)) / 2;
+  }
+  function yLqf(i) {
+    return (yL16(i * 2) + yL16(i * 2 + 1)) / 2;
+  }
+  function yLsf() {
+    return (yLqf(0) + yLqf(1)) / 2;
+  }
+  function yR16(i) {
+    return (yR32(i * 2) + yR32(i * 2 + 1)) / 2;
+  }
+  function yRqf(i) {
+    return (yR16(i * 2) + yR16(i * 2 + 1)) / 2;
+  }
+  function yRsf() {
+    return (yRqf(0) + yRqf(1)) / 2;
+  }
+  var yFIN = TOTAL_H / 2;
+  var TC = {
     r32: "#3a7bd5",
     r16: "#8e44ad",
     qf: "#c0392b",
@@ -2064,26 +1957,25 @@ function BracketTab({
     fin: "#c0b037",
     p3: "#27ae60"
   };
-  const Card = ({
-    matchId,
-    side,
-    eq,
-    x,
-    y,
-    color
-  }) => {
-    const s = sc(matchId);
-    const sc = side === 1 ? s.g1 : s.g2;
-    const won = isWin(matchId, side);
-    const isPH = !eq || eq.startsWith("3e") || eq === "À déterm.";
+  function trim(s) {
+    return s && s.length > 17 ? s.slice(0, 16) + "…" : s || "À déterm.";
+  }
+
+  // Composants SVG
+  function Card(fifaId, side, eq, x, y, color) {
+    var s = sc(fifaId);
+    var sc_val = side === 1 ? s.g1 : s.g2;
+    var won = isWin(fifaId, side);
+    var isPH = !eq || eq.startsWith("3e") || eq === "À déterm.";
+    var hasScore = s.g1 !== '' && s.g2 !== '';
     return React.createElement("g", null, React.createElement("rect", {
-      x,
-      y,
+      x: x,
+      y: y,
       width: CW,
       height: CH,
       rx: 4,
-      fill: won ? `${color}33` : "#111827",
-      stroke: won ? color : `${color}44`,
+      fill: won ? color + "33" : "#111827",
+      stroke: won ? color : color + "44",
       strokeWidth: won ? 1.5 : 1
     }), React.createElement("text", {
       x: x + 6,
@@ -2093,7 +1985,7 @@ function BracketTab({
       fontWeight: won ? 700 : 400,
       fontFamily: "Segoe UI,system-ui,sans-serif",
       fontStyle: isPH ? "italic" : "normal"
-    }, eq ? eq.length > 17 ? eq.slice(0, 16) + "…" : eq : "À déterm."), s.g1 !== '' && s.g2 !== '' && React.createElement("text", {
+    }, trim(eq)), hasScore && React.createElement("text", {
       x: x + CW - 14,
       y: y + CH / 2 + 4,
       fontSize: 10,
@@ -2101,33 +1993,14 @@ function BracketTab({
       textAnchor: "middle",
       fill: won ? color : "#6b7280",
       fontFamily: "Segoe UI,system-ui,sans-serif"
-    }, sc));
-  };
-  const Match2 = ({
-    matchId,
-    eq1,
-    eq2,
-    x,
-    yc,
-    color
-  }) => {
-    const y1 = yc - CH - GAP / 2,
+    }, sc_val));
+  }
+  function Match(fifaId, eq1, eq2, x, yc, color) {
+    var y1 = yc - CH - GAP / 2,
       y2 = yc + GAP / 2;
-    return React.createElement("g", null, React.createElement(Card, {
-      matchId,
-      side: 1,
-      eq: eq1,
-      x,
-      y: y1,
-      color
-    }), React.createElement(Card, {
-      matchId,
-      side: 2,
-      eq: eq2,
-      x,
-      y: y2,
-      color
-    }), React.createElement("line", {
+    return React.createElement("g", {
+      key: fifaId
+    }, Card(fifaId, 1, eq1, x, y1, color), Card(fifaId, 2, eq2, x, y2, color), React.createElement("line", {
       x1: x + 4,
       y1: yc,
       x2: x + CW - 4,
@@ -2135,32 +2008,307 @@ function BracketTab({
       stroke: "#1e2a3a",
       strokeWidth: 1
     }));
-  };
-  const Conn = ({
-    x1,
-    y1,
-    x2,
-    y2,
-    color
-  }) => React.createElement("path", {
-    d: `M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}`,
-    fill: "none",
-    stroke: `${color}55`,
-    strokeWidth: 1.5
+  }
+  function Conn(key, x1, y1, x2, y2, color) {
+    var mx = (x1 + x2) / 2;
+    return React.createElement("path", {
+      key: key,
+      d: "M" + x1 + "," + y1 + " C" + mx + "," + y1 + " " + mx + "," + y2 + " " + x2 + "," + y2,
+      fill: "none",
+      stroke: color + "55",
+      strokeWidth: 1.5
+    });
+  }
+  function Lbl(key, x, y, txt, color) {
+    return React.createElement("text", {
+      key: key,
+      x: x,
+      y: y,
+      textAnchor: "middle",
+      fontSize: 8,
+      fontWeight: 700,
+      fill: color,
+      fontFamily: "Segoe UI,system-ui,sans-serif",
+      letterSpacing: 1
+    }, txt);
+  }
+
+  // Ordre gauche: M74,M77,M73,M75,M76,M78,M79,M80
+  var LO = [74, 77, 73, 75, 76, 78, 79, 80];
+  // Ordre droit:  M84,M83,M86,M88,M81,M82,M87,M85
+  var RO = [84, 83, 86, 88, 81, 82, 87, 85];
+  // Connexions R32→R16 côté droit (r32idx → r16idx)
+  // M93=W84[0]+W83[1], M94=W81[4]+W82[5], M95=W86[2]+W88[3], M96=W85[7]+W87[6]
+  var DR_CONN = [[0, 0], [1, 0], [2, 2], [3, 2], [4, 1], [5, 1], [6, 3], [7, 3]];
+
+  // IDs R16 gauche/droite pour les matchs (pour score)
+  var L16_IDS = ["M89", "M90", "M91", "M92"];
+  var R16_IDS = ["M93", "M94", "M95", "M96"];
+  var LQF_IDS = ["M97", "M98"];
+  var RQF_IDS = ["M99", "M100"];
+  var els = [];
+
+  // R32 GAUCHE
+  LO.forEach(function (n, i) {
+    els.push(Match("M" + n, ML[n].eq1, ML[n].eq2, xL0, yR32(i), TC.r32));
+    els.push(React.createElement("text", {
+      key: "ll" + n,
+      x: xL0 + CW + 2,
+      y: yR32(i) - 1,
+      fontSize: 7,
+      fill: TC.r32 + "88",
+      fontFamily: "Segoe UI,system-ui,sans-serif",
+      fontWeight: 700
+    }, "M" + n));
   });
-  const MatchLabel = ({
-    n,
-    x,
-    yc,
-    color
-  }) => React.createElement("text", {
-    x: x + CW + 2,
-    y: yc - 1,
-    fontSize: 7,
-    fill: `${color}88`,
+  // Conn R32→R16 gauche: paires 0+1→L16[0], 2+3→L16[1], 4+5→L16[2], 6+7→L16[3]
+  LO.forEach(function (_, i) {
+    els.push(Conn("cl32-" + i, xL0 + CW, yR32(i), xL1, yL16(Math.floor(i / 2)), TC.r32));
+  });
+
+  // R16 GAUCHE
+  var l16eqs = [{
+    eq1: r16[89].eq1,
+    eq2: r16[89].eq2
+  }, {
+    eq1: r16[90].eq1,
+    eq2: r16[90].eq2
+  }, {
+    eq1: r16[91].eq1,
+    eq2: r16[91].eq2
+  }, {
+    eq1: r16[92].eq1,
+    eq2: r16[92].eq2
+  }];
+  L16_IDS.forEach(function (id, i) {
+    els.push(Match(id, l16eqs[i].eq1 || "À déterm.", l16eqs[i].eq2 || "À déterm.", xL1, yL16(i), TC.r16));
+    els.push(Conn("cl16-" + i + "a", xL1 + CW, yL16(i), xL2, yLqf(Math.floor(i / 2)), TC.r16));
+  });
+
+  // QF GAUCHE
+  var lqfeqs = [{
+    eq1: qf[97].eq1,
+    eq2: qf[97].eq2
+  }, {
+    eq1: qf[98].eq1,
+    eq2: qf[98].eq2
+  }];
+  LQF_IDS.forEach(function (id, i) {
+    els.push(Match(id, lqfeqs[i].eq1 || "À déterm.", lqfeqs[i].eq2 || "À déterm.", xL2, yLqf(i), TC.qf));
+    els.push(Conn("clqf-" + i, xL2 + CW, yLqf(i), xL3, yLsf(), TC.qf));
+  });
+
+  // SF GAUCHE
+  els.push(Match("M101", sf[101].eq1 || "À déterm.", sf[101].eq2 || "À déterm.", xL3, yLsf(), TC.sf));
+  els.push(Conn("clsf", xL3 + CW, yLsf(), xFIN, yFIN - CH - GAP / 2, TC.sf));
+
+  // FINALE centre
+  var finS = sc("FIN");
+  var hasFinScore = finS.g1 !== '' && finS.g2 !== '';
+  els.push(React.createElement("rect", {
+    key: "fin-bg",
+    x: xFIN - 2,
+    y: yFIN - 52,
+    width: CW + 4,
+    height: 110,
+    rx: 6,
+    fill: "#0a0f1e",
+    stroke: "#c0b03766",
+    strokeWidth: 2
+  }));
+  els.push(React.createElement("text", {
+    key: "fin-t",
+    x: xFIN + CW / 2,
+    y: yFIN - 38,
+    textAnchor: "middle",
+    fontSize: 9,
+    fontWeight: 800,
+    fill: "#c0b037",
     fontFamily: "Segoe UI,system-ui,sans-serif",
-    fontWeight: 700
-  }, `M${n}`);
+    letterSpacing: 2
+  }, "🏆 FINALE"));
+  els.push(React.createElement("text", {
+    key: "fin-d",
+    x: xFIN + CW / 2,
+    y: yFIN - 26,
+    textAnchor: "middle",
+    fontSize: 7.5,
+    fill: "#5a6070",
+    fontFamily: "Segoe UI,system-ui,sans-serif"
+  }, "19 juil · MetLife · New York"));
+  els.push(React.createElement("rect", {
+    key: "fin-r1",
+    x: xFIN,
+    y: yFIN - 16,
+    width: CW,
+    height: CH,
+    rx: 4,
+    fill: isWin("FIN", 1) ? "#c0b03733" : "#111827",
+    stroke: isWin("FIN", 1) ? "#c0b037" : "#c0b03766",
+    strokeWidth: isWin("FIN", 1) ? 2 : 1
+  }));
+  els.push(React.createElement("text", {
+    key: "fin-e1",
+    x: xFIN + 6,
+    y: yFIN - 16 + CH / 2 + 4,
+    fontSize: 9.5,
+    fill: FIN_eq1 ? isWin("FIN", 1) ? "#fff" : "#c8d0e0" : "#3a4a5a",
+    fontWeight: isWin("FIN", 1) ? 800 : 400,
+    fontFamily: "Segoe UI,system-ui,sans-serif",
+    fontStyle: FIN_eq1 ? "normal" : "italic"
+  }, trim(FIN_eq1)));
+  hasFinScore && els.push(React.createElement("text", {
+    key: "fin-s1",
+    x: xFIN + CW - 14,
+    y: yFIN - 16 + CH / 2 + 4,
+    fontSize: 10,
+    fontWeight: 800,
+    textAnchor: "middle",
+    fill: isWin("FIN", 1) ? "#c0b037" : "#6b7280",
+    fontFamily: "Segoe UI,system-ui,sans-serif"
+  }, finS.g1));
+  els.push(React.createElement("line", {
+    key: "fin-sep",
+    x1: xFIN + 4,
+    y1: yFIN + GAP / 2 - 2,
+    x2: xFIN + CW - 4,
+    y2: yFIN + GAP / 2 - 2,
+    stroke: "#c0b03733",
+    strokeWidth: 1
+  }));
+  els.push(React.createElement("rect", {
+    key: "fin-r2",
+    x: xFIN,
+    y: yFIN + GAP / 2,
+    width: CW,
+    height: CH,
+    rx: 4,
+    fill: isWin("FIN", 2) ? "#c0b03733" : "#111827",
+    stroke: isWin("FIN", 2) ? "#c0b037" : "#c0b03766",
+    strokeWidth: isWin("FIN", 2) ? 2 : 1
+  }));
+  els.push(React.createElement("text", {
+    key: "fin-e2",
+    x: xFIN + 6,
+    y: yFIN + GAP / 2 + CH / 2 + 4,
+    fontSize: 9.5,
+    fill: FIN_eq2 ? isWin("FIN", 2) ? "#fff" : "#c8d0e0" : "#3a4a5a",
+    fontWeight: isWin("FIN", 2) ? 800 : 400,
+    fontFamily: "Segoe UI,system-ui,sans-serif",
+    fontStyle: FIN_eq2 ? "normal" : "italic"
+  }, trim(FIN_eq2)));
+  hasFinScore && els.push(React.createElement("text", {
+    key: "fin-s2",
+    x: xFIN + CW - 14,
+    y: yFIN + GAP / 2 + CH / 2 + 4,
+    fontSize: 10,
+    fontWeight: 800,
+    textAnchor: "middle",
+    fill: isWin("FIN", 2) ? "#c0b037" : "#6b7280",
+    fontFamily: "Segoe UI,system-ui,sans-serif"
+  }, finS.g2));
+
+  // Petite finale
+  els.push(React.createElement("text", {
+    key: "p3-t",
+    x: xFIN + CW / 2,
+    y: yFIN + 84,
+    textAnchor: "middle",
+    fontSize: 8,
+    fontWeight: 700,
+    fill: "#27ae60",
+    fontFamily: "Segoe UI,system-ui,sans-serif"
+  }, "3e PLACE · 18 juil · Miami"));
+  els.push(React.createElement("rect", {
+    key: "p3-r1",
+    x: xFIN,
+    y: yFIN + 92,
+    width: CW,
+    height: CH,
+    rx: 4,
+    fill: "#111827",
+    stroke: "#27ae6055",
+    strokeWidth: 1
+  }));
+  els.push(React.createElement("text", {
+    key: "p3-e1",
+    x: xFIN + 6,
+    y: yFIN + 92 + CH / 2 + 4,
+    fontSize: 9,
+    fill: P3_eq1 ? "#c8d0e0" : "#3a4a5a",
+    fontFamily: "Segoe UI,system-ui,sans-serif",
+    fontStyle: P3_eq1 ? "normal" : "italic"
+  }, trim(P3_eq1 || "Perd. M101")));
+  els.push(React.createElement("rect", {
+    key: "p3-r2",
+    x: xFIN,
+    y: yFIN + 92 + CH + 4,
+    width: CW,
+    height: CH,
+    rx: 4,
+    fill: "#111827",
+    stroke: "#27ae6055",
+    strokeWidth: 1
+  }));
+  els.push(React.createElement("text", {
+    key: "p3-e2",
+    x: xFIN + 6,
+    y: yFIN + 92 + CH + 4 + CH / 2 + 4,
+    fontSize: 9,
+    fill: P3_eq2 ? "#c8d0e0" : "#3a4a5a",
+    fontFamily: "Segoe UI,system-ui,sans-serif",
+    fontStyle: P3_eq2 ? "normal" : "italic"
+  }, trim(P3_eq2 || "Perd. M102")));
+
+  // SF DROITE
+  els.push(Conn("crsf", xR3, yRsf(), xFIN + CW, yFIN, TC.sf));
+  els.push(Match("M102", sf[102].eq1 || "À déterm.", sf[102].eq2 || "À déterm.", xR3, yRsf(), TC.sf));
+
+  // QF DROITE
+  var rqfeqs = [{
+    eq1: qf[99].eq1,
+    eq2: qf[99].eq2
+  }, {
+    eq1: qf[100].eq1,
+    eq2: qf[100].eq2
+  }];
+  RQF_IDS.forEach(function (id, i) {
+    els.push(Match(id, rqfeqs[i].eq1 || "À déterm.", rqfeqs[i].eq2 || "À déterm.", xR2, yRqf(i), TC.qf));
+    els.push(Conn("crqf-" + i, xR2 + CW, yRqf(i), xR3, yRsf(), TC.qf));
+  });
+
+  // R16 DROITE
+  var r16eqs = [{
+    eq1: r16[93].eq1,
+    eq2: r16[93].eq2
+  }, {
+    eq1: r16[94].eq1,
+    eq2: r16[94].eq2
+  }, {
+    eq1: r16[95].eq1,
+    eq2: r16[95].eq2
+  }, {
+    eq1: r16[96].eq1,
+    eq2: r16[96].eq2
+  }];
+  R16_IDS.forEach(function (id, i) {
+    els.push(Match(id, r16eqs[i].eq1 || "À déterm.", r16eqs[i].eq2 || "À déterm.", xR1, yR16(i), TC.r16));
+    els.push(Conn("cr16-" + i, xR1 + CW, yR16(i), xR2, yRqf(Math.floor(i / 2)), TC.r16));
+  });
+
+  // R32 DROITE
+  RO.forEach(function (n, i) {
+    els.push(Match("M" + n, ML[n].eq1, ML[n].eq2, xR0, yR32(i), TC.r32));
+  });
+  DR_CONN.forEach(function (pair, i) {
+    els.push(Conn("cr32-" + i, xR0 + CW, yR32(pair[0]), xR1, yR16(pair[1]), TC.r32));
+  });
+
+  // Légendes colonnes
+  var cols = [[xL0 + CW / 2, "1/16", TC.r32], [xL1 + CW / 2, "1/8", TC.r16], [xL2 + CW / 2, "1/4", TC.qf], [xL3 + CW / 2, "1/2", TC.sf], [xFIN + CW / 2, "FIN", TC.fin], [xR3 + CW / 2, "1/2", TC.sf], [xR2 + CW / 2, "1/4", TC.qf], [xR1 + CW / 2, "1/8", TC.r16], [xR0 + CW / 2, "1/16", TC.r32]];
+  cols.forEach(function (c, i) {
+    els.push(Lbl("lbcol-" + i, c[0], SVG_H - 8, c[1], c[2]));
+  });
   return React.createElement("div", {
     style: {
       overflowX: "auto",
@@ -2186,406 +2334,18 @@ function BracketTab({
       marginTop: 4,
       lineHeight: 1.6
     }
-  }, "🇩🇪 All. vs 🇫🇷 Fra. possibles dès le 1/8 (M89) · 🇫🇷 Fra. et 🇳🇴 Nor. au plus tôt en demi-finale (M101)")), React.createElement("svg", {
+  }, "🇩🇪 All. vs 🇫🇷 Fra. possibles en 1/8 (M89) · 🇫🇷 Fra. et 🇳🇴 Nor. au plus tôt en demi-finale (M101)")), React.createElement("svg", {
     width: SVG_W,
     height: SVG_H,
     style: {
       display: "block",
       margin: "0 auto"
     },
-    viewBox: `0 0 ${SVG_W} ${SVG_H}`
-  },
-  // ── R32 GAUCHE (ordre : M74, M77, M73, M75, M76, M78, M79, M80) ──
-  ...LEFT_R32_ORDER.map((n, i) => React.createElement(Match2, {
-    key: `r32l-${n}`,
-    matchId: `M${n}`,
-    eq1: M[n].eq1,
-    eq2: M[n].eq2,
-    x: xL0,
-    yc: yR32(i),
-    color: TC.r32
-  })),
-  // Labels
-  ...LEFT_R32_ORDER.map((n, i) => React.createElement(MatchLabel, {
-    key: `lbl32l-${n}`,
-    n,
-    x: xL0,
-    yc: yR32(i),
-    color: TC.r32
-  })),
-  // Connecteurs R32→R16 gauche
-  // M89: M74(0)+M77(1), M90: M73(2)+M75(3), M91: M76(4)+M78(5), M92: M79(6)+M80(7)
-  ...[0, 1, 2, 3, 4, 5, 6, 7].map(i => React.createElement(Conn, {
-    key: `cL32-${i}`,
-    x1: xL0 + CW,
-    y1: yR32(i),
-    x2: xL1,
-    y2: yR16_L(Math.floor(i / 2)),
-    color: TC.r32
-  })),
-  // R16 GAUCHE
-  ...R16_L.map((m, i) => React.createElement(Match2, {
-    key: m.id,
-    matchId: m.id,
-    eq1: m.eq1 || "À déterm.",
-    eq2: m.eq2 || "À déterm.",
-    x: xL1,
-    yc: yR16_L(i),
-    color: TC.r16
-  })), ...R16_L.map((m, i) => React.createElement(MatchLabel, {
-    key: `lbl16l-${i}`,
-    n: m.n,
-    x: xL1,
-    yc: yR16_L(i),
-    color: TC.r16
-  })),
-  // Connecteurs R16→QF gauche
-  ...[0, 1, 2, 3].map(i => React.createElement(Conn, {
-    key: `cL16-${i}`,
-    x1: xL1 + CW,
-    y1: yR16_L(i),
-    x2: xL2,
-    y2: yQF_L(Math.floor(i / 2)),
-    color: TC.r16
-  })),
-  // QF GAUCHE
-  ...QF_L.map((m, i) => React.createElement(Match2, {
-    key: m.id,
-    matchId: m.id,
-    eq1: m.eq1 || "À déterm.",
-    eq2: m.eq2 || "À déterm.",
-    x: xL2,
-    yc: yQF_L(i),
-    color: TC.qf
-  })), React.createElement(MatchLabel, {
-    key: "lbl97",
-    n: 97,
-    x: xL2,
-    yc: yQF_L(0),
-    color: TC.qf
-  }), React.createElement(MatchLabel, {
-    key: "lbl98",
-    n: 98,
-    x: xL2,
-    yc: yQF_L(1),
-    color: TC.qf
-  }),
-  // Connecteurs QF→SF gauche
-  React.createElement(Conn, {
-    key: "cL97",
-    x1: xL2 + CW,
-    y1: yQF_L(0),
-    x2: xL3,
-    y2: ySF_L(),
-    color: TC.qf
-  }), React.createElement(Conn, {
-    key: "cL98",
-    x1: xL2 + CW,
-    y1: yQF_L(1),
-    x2: xL3,
-    y2: ySF_L(),
-    color: TC.qf
-  }),
-  // SF GAUCHE (M101)
-  React.createElement(Match2, {
-    key: "M101",
-    matchId: "M101",
-    eq1: SF1.eq1 || "À déterm.",
-    eq2: SF1.eq2 || "À déterm.",
-    x: xL3,
-    yc: ySF_L(),
-    color: TC.sf
-  }), React.createElement(MatchLabel, {
-    key: "lbl101",
-    n: 101,
-    x: xL3,
-    yc: ySF_L(),
-    color: TC.sf
-  }),
-  // Connecteur SF→FIN gauche
-  React.createElement(Conn, {
-    key: "cSF1",
-    x1: xL3 + CW,
-    y1: ySF_L(),
-    x2: xFIN,
-    y2: yFIN - CH / 2 - GAP / 2 - CH / 2,
-    color: TC.sf
-  }),
-  // ── FINALE au centre ──
-  React.createElement("rect", {
-    x: xFIN - 2,
-    y: yFIN - 50,
-    width: CW + 4,
-    height: 106,
-    rx: 6,
-    fill: "#0a0f1e",
-    stroke: "#c0b03766",
-    strokeWidth: 2
-  }), React.createElement("text", {
-    x: xFIN + CW / 2,
-    y: yFIN - 36,
-    textAnchor: "middle",
-    fontSize: 9,
-    fontWeight: 800,
-    fill: "#c0b037",
-    fontFamily: "Segoe UI,system-ui,sans-serif",
-    letterSpacing: 2
-  }, "🏆 FINALE"), React.createElement("text", {
-    x: xFIN + CW / 2,
-    y: yFIN - 24,
-    textAnchor: "middle",
-    fontSize: 7.5,
-    fill: "#5a6070",
-    fontFamily: "Segoe UI,system-ui,sans-serif"
-  }, "19 juil · MetLife Stadium · New York"),
-  // Carte FIN eq1
-  React.createElement("rect", {
-    x: xFIN,
-    y: yFIN - 16,
-    width: CW,
-    height: CH,
-    rx: 4,
-    fill: isWin("FIN", 1) ? "#c0b03733" : "#111827",
-    stroke: isWin("FIN", 1) ? "#c0b037" : "#c0b03766",
-    strokeWidth: isWin("FIN", 1) ? 2 : 1
-  }), React.createElement("text", {
-    x: xFIN + 6,
-    y: yFIN - 16 + CH / 2 + 4,
-    fontSize: 9.5,
-    fill: FIN_eq1 ? isWin("FIN", 1) ? "#fff" : "#c8d0e0" : "#3a4a5a",
-    fontWeight: isWin("FIN", 1) ? 800 : 400,
-    fontFamily: "Segoe UI,system-ui,sans-serif",
-    fontStyle: FIN_eq1 ? "normal" : "italic"
-  }, FIN_eq1 ? FIN_eq1.length > 17 ? FIN_eq1.slice(0, 16) + "…" : FIN_eq1 : "À déterm."), sc("FIN").g1 !== '' && sc("FIN").g2 !== '' && React.createElement("text", {
-    x: xFIN + CW - 14,
-    y: yFIN - 16 + CH / 2 + 4,
-    fontSize: 10,
-    fontWeight: 800,
-    textAnchor: "middle",
-    fill: isWin("FIN", 1) ? "#c0b037" : "#6b7280",
-    fontFamily: "Segoe UI,system-ui,sans-serif"
-  }, sc("FIN").g1), React.createElement("line", {
-    x1: xFIN + 4,
-    y1: yFIN + GAP / 2 - 2,
-    x2: xFIN + CW - 4,
-    y2: yFIN + GAP / 2 - 2,
-    stroke: "#c0b03733",
-    strokeWidth: 1
-  }),
-  // Carte FIN eq2
-  React.createElement("rect", {
-    x: xFIN,
-    y: yFIN + GAP / 2,
-    width: CW,
-    height: CH,
-    rx: 4,
-    fill: isWin("FIN", 2) ? "#c0b03733" : "#111827",
-    stroke: isWin("FIN", 2) ? "#c0b037" : "#c0b03766",
-    strokeWidth: isWin("FIN", 2) ? 2 : 1
-  }), React.createElement("text", {
-    x: xFIN + 6,
-    y: yFIN + GAP / 2 + CH / 2 + 4,
-    fontSize: 9.5,
-    fill: FIN_eq2 ? isWin("FIN", 2) ? "#fff" : "#c8d0e0" : "#3a4a5a",
-    fontWeight: isWin("FIN", 2) ? 800 : 400,
-    fontFamily: "Segoe UI,system-ui,sans-serif",
-    fontStyle: FIN_eq2 ? "normal" : "italic"
-  }, FIN_eq2 ? FIN_eq2.length > 17 ? FIN_eq2.slice(0, 16) + "…" : FIN_eq2 : "À déterm."), sc("FIN").g1 !== '' && sc("FIN").g2 !== '' && React.createElement("text", {
-    x: xFIN + CW - 14,
-    y: yFIN + GAP / 2 + CH / 2 + 4,
-    fontSize: 10,
-    fontWeight: 800,
-    textAnchor: "middle",
-    fill: isWin("FIN", 2) ? "#c0b037" : "#6b7280",
-    fontFamily: "Segoe UI,system-ui,sans-serif"
-  }, sc("FIN").g2),
-  // Petite finale M103
-  React.createElement("text", {
-    x: xFIN + CW / 2,
-    y: yFIN + 82,
-    textAnchor: "middle",
-    fontSize: 8,
-    fontWeight: 700,
-    fill: "#27ae60",
-    fontFamily: "Segoe UI,system-ui,sans-serif"
-  }, "3e PLACE (M103) · 18 juil · Miami"), React.createElement("rect", {
-    x: xFIN,
-    y: yFIN + 90,
-    width: CW,
-    height: CH,
-    rx: 4,
-    fill: "#111827",
-    stroke: "#27ae6055",
-    strokeWidth: 1
-  }), React.createElement("text", {
-    x: xFIN + 6,
-    y: yFIN + 90 + CH / 2 + 4,
-    fontSize: 9,
-    fill: P3_eq1 ? "#c8d0e0" : "#3a4a5a",
-    fontFamily: "Segoe UI,system-ui,sans-serif",
-    fontStyle: P3_eq1 ? "normal" : "italic"
-  }, P3_eq1 ? P3_eq1.length > 17 ? P3_eq1.slice(0, 16) + "…" : P3_eq1 : "Perd. M101"), React.createElement("rect", {
-    x: xFIN,
-    y: yFIN + 90 + CH + 4,
-    width: CW,
-    height: CH,
-    rx: 4,
-    fill: "#111827",
-    stroke: "#27ae6055",
-    strokeWidth: 1
-  }), React.createElement("text", {
-    x: xFIN + 6,
-    y: yFIN + 90 + CH + 4 + CH / 2 + 4,
-    fontSize: 9,
-    fill: P3_eq2 ? "#c8d0e0" : "#3a4a5a",
-    fontFamily: "Segoe UI,system-ui,sans-serif",
-    fontStyle: P3_eq2 ? "normal" : "italic"
-  }, P3_eq2 ? P3_eq2.length > 17 ? P3_eq2.slice(0, 16) + "…" : P3_eq2 : "Perd. M102"),
-  // Connecteur SF→FIN droit
-  React.createElement(Conn, {
-    key: "cSF2",
-    x1: xR3,
-    y1: ySF_R(),
-    x2: xFIN + CW,
-    y2: yFIN,
-    color: TC.sf
-  }),
-  // SF DROITE (M102)
-  React.createElement(Match2, {
-    key: "M102",
-    matchId: "M102",
-    eq1: SF2.eq1 || "À déterm.",
-    eq2: SF2.eq2 || "À déterm.",
-    x: xR3,
-    yc: ySF_R(),
-    color: TC.sf
-  }), React.createElement(MatchLabel, {
-    key: "lbl102",
-    n: 102,
-    x: xR3,
-    yc: ySF_R(),
-    color: TC.sf
-  }),
-  // Connecteurs QF→SF droite
-  React.createElement(Conn, {
-    key: "cR99",
-    x1: xR2 + CW,
-    y1: yQF_R(0),
-    x2: xR3,
-    y2: ySF_R(),
-    color: TC.qf
-  }), React.createElement(Conn, {
-    key: "cR100",
-    x1: xR2 + CW,
-    y1: yQF_R(1),
-    x2: xR3,
-    y2: ySF_R(),
-    color: TC.qf
-  }),
-  // QF DROITE
-  ...QF_R.map((m, i) => React.createElement(Match2, {
-    key: m.id,
-    matchId: m.id,
-    eq1: m.eq1 || "À déterm.",
-    eq2: m.eq2 || "À déterm.",
-    x: xR2,
-    yc: yQF_R(i),
-    color: TC.qf
-  })), React.createElement(MatchLabel, {
-    key: "lbl99",
-    n: 99,
-    x: xR2,
-    yc: yQF_R(0),
-    color: TC.qf
-  }), React.createElement(MatchLabel, {
-    key: "lbl100",
-    n: 100,
-    x: xR2,
-    yc: yQF_R(1),
-    color: TC.qf
-  }),
-  // Connecteurs R16→QF droite
-  ...[0, 1, 2, 3].map(i => React.createElement(Conn, {
-    key: `cR16-${i}`,
-    x1: xR1 + CW,
-    y1: yR16_R(i),
-    x2: xR2,
-    y2: yQF_R(Math.floor(i / 2)),
-    color: TC.r16
-  })),
-  // R16 DROITE (ordre: M93, M94, M95, M96 de haut en bas)
-  ...R16_R.map((m, i) => React.createElement(Match2, {
-    key: m.id,
-    matchId: m.id,
-    eq1: m.eq1 || "À déterm.",
-    eq2: m.eq2 || "À déterm.",
-    x: xR1,
-    yc: yR16_R(i),
-    color: TC.r16
-  })), ...R16_R.map((m, i) => React.createElement(MatchLabel, {
-    key: `lbl16r-${i}`,
-    n: m.n,
-    x: xR1,
-    yc: yR16_R(i),
-    color: TC.r16
-  })),
-  // Connecteurs R32→R16 droite
-  // M93: M84(0)+M83(1), M94: M81(4-mais idx2)+M82(5-idx3), M95: M86(2-idx4)+M88(3-idx5) hmm non
-  // RIGHT_R32_ORDER = [84,83,86,88,81,82,87,85]
-  // M93=W84[0]+W83[1]→R16[0], M94=W81[4]+W82[5]→R16[1] ... non: M94=W81+W82
-  // Idx: 84=0,83=1,86=2,88=3,81=4,82=5,87=6,85=7
-  // M93=W[0]+W[1]→R16[0], M94=W[4]+W[5]→R16[1], M95=W[2]+W[3]→R16[2], M96=W[7]+W[6]→R16[3]
-  // Mais les connexions visuelles doivent relier le bon R32 à son R16
-  // M93 (R16[0]) ← M84[0] et M83[1]
-  // M94 (R16[1]) ← M81[4] et M82[5]
-  // M95 (R16[2]) ← M86[2] et M88[3]
-  // M96 (R16[3]) ← M85[7] et M87[6]
-  ...[[0, 0], [1, 0],
-  // M84,M83 → M93 (R16[0])
-  [2, 2], [3, 2],
-  // M86,M88 → M95 (R16[2])
-  [4, 1], [5, 1],
-  // M81,M82 → M94 (R16[1])
-  [6, 3], [7, 3] // M87,M85 → M96 (R16[3])
-  ].map(([r32idx, r16idx], i) => React.createElement(Conn, {
-    key: `cR32r-${i}`,
-    x1: xR0 + CW,
-    y1: yR32(r32idx),
-    x2: xR1,
-    y2: yR16_R(r16idx),
-    color: TC.r32
-  })),
-  // R32 DROITE (ordre visuel: M84,M83,M86,M88,M81,M82,M87,M85 haut→bas)
-  ...RIGHT_R32_ORDER.map((n, i) => React.createElement(Match2, {
-    key: `r32r-${n}`,
-    matchId: `M${n}`,
-    eq1: M[n].eq1,
-    eq2: M[n].eq2,
-    x: xR0,
-    yc: yR32(i),
-    color: TC.r32
-  })), ...RIGHT_R32_ORDER.map((n, i) => React.createElement("text", {
-    key: `lbl32r-${n}`,
-    x: xR0 - 18,
-    y: yR32(i) + 3,
-    fontSize: 7,
-    fill: `${TC.r32}88`,
-    fontFamily: "Segoe UI,system-ui,sans-serif",
-    fontWeight: 700
-  }, `M${n}`)),
-  // Légendes colonnes
-  ...[[xL0 + CW / 2, SVG_H - 8, "1/16", TC.r32], [xL1 + CW / 2, SVG_H - 8, "1/8", TC.r16], [xL2 + CW / 2, SVG_H - 8, "1/4", TC.qf], [xL3 + CW / 2, SVG_H - 8, "1/2", TC.sf], [xFIN + CW / 2, SVG_H - 8, "FIN", TC.fin], [xR3 + CW / 2, SVG_H - 8, "1/2", TC.sf], [xR2 + CW / 2, SVG_H - 8, "1/4", TC.qf], [xR1 + CW / 2, SVG_H - 8, "1/8", TC.r16], [xR0 + CW / 2, SVG_H - 8, "1/16", TC.r32]].map(([x, y, label, color], i) => React.createElement("text", {
-    key: `lbcol-${i}`,
-    x,
-    y,
-    textAnchor: "middle",
-    fontSize: 8,
-    fontWeight: 700,
-    fill: color,
-    fontFamily: "Segoe UI,system-ui,sans-serif",
-    letterSpacing: 1
-  }, label))));
+    viewBox: "0 0 " + SVG_W + " " + SVG_H
+  }, els));
 }
+
+
 
 
 
