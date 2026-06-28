@@ -1751,31 +1751,26 @@ function BracketTab(props) {
     return side === 1 ? g1 > g2 : g2 > g1;
   }
 
-  // Affiches officielles 1/16 (source : tableau FIFA officiel image confirmée)
-  // Slots thirds[] → 3es saisies manuellement :
-  // t(0)→M74(All vs 3D=Paraguay), t(1)→M77(Fra vs 3F=Suède)
-  // t(2)→M79(Mex vs 3E=Équateur), t(3)→M80(Ang vs 3L=RD Congo)
-  // t(4)→M82(Bel vs 3I=Sénégal),  t(5)→M85(Sui vs 3J=Algérie)
-  // t(6)→M83(Por vs 3L=Croatie... non: Por vs Ghana 2L)
-  // t(7)→M81(USA vs 3B=Bosnie)
-  // NB: M83=Portugal vs Croatie(3L), M87=Colombie vs Ghana(2L)
+  // Affiches officielles 1/16 — source : tableau FIFA officiel (image confirmée 28 juin 2026)
+  // Équipes en dur — pas de dépendance aux slots thirds[]
   var ML = {
-    73: { eq1:"🇿🇦 Afrique du Sud", eq2:"🇨🇦 Canada" },           // 2A vs 2B
-    74: { eq1:"🇩🇪 Allemagne",      eq2: t(0) || "🇵🇾 Paraguay" }, // 1E vs 3D
-    75: { eq1:"🇳🇱 Pays-Bas",       eq2:"🇲🇦 Maroc" },            // 1F vs 2C
-    76: { eq1:"🇧🇷 Brésil",         eq2:"🇯🇵 Japon" },            // 1C vs 2F
-    77: { eq1:"🇫🇷 France",         eq2: t(1) || "🇸🇪 Suède" },   // 1I vs 3F
-    78: { eq1:"🇨🇮 Côte d'Ivoire", eq2:"🇳🇴 Norvège" },          // 2E vs 2I
-    79: { eq1:"🇲🇽 Mexique",        eq2: t(2) || "🇪🇨 Équateur" },// 1A vs 3E
-    80: { eq1:"🏴 Angleterre",      eq2: t(3) || "🇨🇩 RD Congo" },// 1L vs 3 (RD Congo=3K selon image)
-    81: { eq1:"🇺🇸 États-Unis",     eq2: t(5) || "🇧🇦 Bosnie" },  // 1D vs 3B ← t(5)=R32-10
-    82: { eq1:"🇧🇪 Belgique",       eq2: t(4) || "🇸🇳 Sénégal" }, // 1G vs 3I
-    83: { eq1:"🇵🇹 Portugal",       eq2: t(7) || "🇭🇷 Croatie" }, // 2K vs 3L ← t(7)=R32-16
-    84: { eq1:"🇪🇸 Espagne",        eq2:"🇦🇹 Autriche" },         // 1H vs 2J
-    85: { eq1:"🇨🇭 Suisse",         eq2: t(6) || "🇩🇿 Algérie" }, // 1B vs 3G ← t(6)=R32-13
-    86: { eq1:"🇦🇷 Argentine",      eq2:"🇨🇻 Cap-Vert" },         // 1J vs 2H
-    87: { eq1:"🇨🇴 Colombie",       eq2:"🇬🇭 Ghana" },            // 1K vs 2L
-    88: { eq1:"🇦🇺 Australie",      eq2:"🇪🇬 Égypte" },           // 2D vs 2G
+    // CÔTÉ GAUCHE
+    73: { eq1:"🇿🇦 Afrique du Sud",  eq2:"🇨🇦 Canada" },
+    74: { eq1:"🇩🇪 Allemagne",       eq2:"🇵🇾 Paraguay" },
+    75: { eq1:"🇳🇱 Pays-Bas",        eq2:"🇲🇦 Maroc" },
+    76: { eq1:"🇧🇷 Brésil",          eq2:"🇯🇵 Japon" },
+    77: { eq1:"🇫🇷 France",          eq2:"🇸🇪 Suède" },
+    78: { eq1:"🇨🇮 Côte d'Ivoire",  eq2:"🇳🇴 Norvège" },
+    79: { eq1:"🇲🇽 Mexique",         eq2:"🇪🇨 Équateur" },
+    80: { eq1:"🏴 Angleterre",       eq2:"🇨🇩 RD Congo" },
+    81: { eq1:"🇺🇸 États-Unis",      eq2:"🇧🇦 Bosnie-Herzégovine" },
+    82: { eq1:"🇧🇪 Belgique",        eq2:"🇸🇳 Sénégal" },
+    83: { eq1:"🇵🇹 Portugal",        eq2:"🇭🇷 Croatie" },
+    84: { eq1:"🇪🇸 Espagne",         eq2:"🇦🇹 Autriche" },
+    85: { eq1:"🇨🇭 Suisse",          eq2:"🇩🇿 Algérie" },
+    86: { eq1:"🇦🇷 Argentine",       eq2:"🇨🇻 Cap-Vert" },
+    87: { eq1:"🇨🇴 Colombie",        eq2:"🇬🇭 Ghana" },
+    88: { eq1:"🇦🇺 Australie",       eq2:"🇪🇬 Égypte" },
   };
   function w32(n) {
     return wonMatch("M" + n, ML[n].eq1, ML[n].eq2);
