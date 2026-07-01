@@ -914,98 +914,98 @@ try {
       stade: "NRG Stadium, Houston",
       tv: TV()
     },
-    "R16-1": {
+    "R16-M89": {
       tour: "1/8 de finale",
       date: "Sam 4 juil",
       heure: "20h00",
       stade: "MetLife Stadium, New York",
       tv: TV(true)
     },
-    "R16-2": {
+    "R16-M90": {
       tour: "1/8 de finale",
       date: "Sam 4 juil",
       heure: "23h00",
       stade: "AT&T Stadium, Dallas",
       tv: TV(true)
     },
-    "R16-3": {
+    "R16-M91": {
       tour: "1/8 de finale",
       date: "Dim 5 juil",
       heure: "22h00",
       stade: "Gillette Stadium, Boston",
       tv: TV(true)
     },
-    "R16-4": {
+    "R16-M92": {
       tour: "1/8 de finale",
       date: "Lun 6 juil",
       heure: "02h00",
       stade: "Mercedes-Benz Stadium, Atlanta",
       tv: TV(true)
     },
-    "R16-5": {
+    "R16-M93": {
       tour: "1/8 de finale",
       date: "Lun 6 juil",
       heure: "21h00",
       stade: "Hard Rock Stadium, Miami",
       tv: TV(true)
     },
-    "R16-6": {
+    "R16-M94": {
       tour: "1/8 de finale",
       date: "Mar 7 juil",
       heure: "02h00",
       stade: "Lincoln Financial Field, Philadelphie",
       tv: TV(true)
     },
-    "R16-7": {
+    "R16-M95": {
       tour: "1/8 de finale",
       date: "Mar 7 juil",
       heure: "18h00",
       stade: "Arrowhead Stadium, Kansas City",
       tv: TV(true)
     },
-    "R16-8": {
+    "R16-M96": {
       tour: "1/8 de finale",
       date: "Mar 7 juil",
       heure: "22h00",
       stade: "SoFi Stadium, Los Angeles",
       tv: TV(true)
     },
-    "QF-1": {
+    "QF-M97": {
       tour: "Quart de finale",
       date: "Jeu 9 juil",
       heure: "22h00",
       stade: "MetLife Stadium, New York",
       tv: TV(true)
     },
-    "QF-2": {
+    "QF-M98": {
       tour: "Quart de finale",
       date: "Ven 10 juil",
       heure: "21h00",
       stade: "Gillette Stadium, Boston",
       tv: TV(true)
     },
-    "QF-3": {
+    "QF-M99": {
       tour: "Quart de finale",
       date: "Sam 11 juil",
       heure: "23h00",
       stade: "AT&T Stadium, Dallas",
       tv: TV(true)
     },
-    "QF-4": {
+    "QF-M100": {
       tour: "Quart de finale",
       date: "Dim 12 juil",
       heure: "03h00",
       stade: "SoFi Stadium, Los Angeles",
       tv: TV(true)
     },
-    "SF-1": {
+    "SF-M101": {
       tour: "Demi-finale",
       date: "Mar 14 juil",
       heure: "21h00",
       stade: "AT&T Stadium, Dallas",
       tv: TV(true)
     },
-    "SF-2": {
+    "SF-M102": {
       tour: "Demi-finale",
       date: "Mer 15 juil",
       heure: "21h00",
@@ -1029,12 +1029,12 @@ try {
   };
   const TOUR_ORDER = ["1/16 de finale", "1/8 de finale", "Quart de finale", "Demi-finale", "Petite finale", "FINALE"];
   const TOUR_IDS = {
-    "1/16 de finale": ["R32-1", "R32-2", "R32-3", "R32-4", "R32-5", "R32-6", "R32-7", "R32-8", "R32-9", "R32-10", "R32-11", "R32-12", "R32-13", "R32-14", "R32-15", "R32-16"],
-    "1/8 de finale": ["R16-1", "R16-2", "R16-3", "R16-4", "R16-5", "R16-6", "R16-7", "R16-8"],
-    "Quart de finale": ["QF-1", "QF-2", "QF-3", "QF-4"],
-    "Demi-finale": ["SF-1", "SF-2"],
-    "Petite finale": ["3PL"],
-    "FINALE": ["FIN"]
+    "1/16 de finale": ["R32-3","R32-6","R32-1","R32-4","R32-16","R32-11","R32-10","R32-9","R32-2","R32-5","R32-7","R32-8","R32-15","R32-14","R32-13","R32-12"],
+    "1/8 de finale":  ["R16-M89","R16-M90","R16-M93","R16-M94","R16-M91","R16-M92","R16-M95","R16-M96"],
+    "Quart de finale":["QF-M97","QF-M98","QF-M99","QF-M100"],
+    "Demi-finale":    ["SF-M101","SF-M102"],
+    "Petite finale":  ["3PL"],
+    "FINALE":         ["FIN"]
   };
   const GRP_COLORS = {
     A: "#e74c3c",
@@ -1114,6 +1114,7 @@ try {
   }
 
   // ─── MOTEUR BRACKET ──────────────────────────────────────────────────────────
+  // Croisements R16 conformes au tableau officiel FIFA 2026
   function computeBracket(scores, thirds) {
     const t = i => thirds[i] && thirds[i].trim() ? thirds[i].trim() : null;
     const standings = {};
@@ -1121,172 +1122,73 @@ try {
       standings[g] = computeStandings(g, scores);
     });
     const top = (g, rank) => standings[g][rank] ? standings[g][rank].name : null;
+
+    // R32 (1/16) — identiques à avant
     const r32 = {
-      "R32-1": {
-        eq1: top("A", 1),
-        eq2: top("B", 1)
-      },
-      "R32-2": {
-        eq1: top("C", 0),
-        eq2: top("F", 1)
-      },
-      "R32-3": {
-        eq1: top("E", 0),
-        eq2: t(0)
-      },
-      "R32-4": {
-        eq1: top("F", 0),
-        eq2: top("C", 1)
-      },
-      "R32-5": {
-        eq1: top("E", 1),
-        eq2: top("I", 1)
-      },
-      "R32-6": {
-        eq1: top("I", 0),
-        eq2: t(1)
-      },
-      "R32-7": {
-        eq1: top("A", 0),
-        eq2: t(2)
-      },
-      "R32-8": {
-        eq1: top("L", 0),
-        eq2: t(3)
-      },
-      "R32-9": {
-        eq1: top("G", 0),
-        eq2: t(4)
-      },
-      "R32-10": {
-        eq1: top("D", 0),
-        eq2: t(5)
-      },
-      "R32-11": {
-        eq1: top("H", 0),
-        eq2: top("J", 1)
-      },
-      "R32-12": {
-        eq1: top("K", 1),
-        eq2: top("L", 1)
-      },
-      "R32-13": {
-        eq1: top("B", 0),
-        eq2: t(6)
-      },
-      "R32-14": {
-        eq1: top("D", 1),
-        eq2: top("G", 1)
-      },
-      "R32-15": {
-        eq1: top("J", 0),
-        eq2: top("H", 1)
-      },
-      "R32-16": {
-        eq1: top("K", 0),
-        eq2: t(7)
-      }
+      "R32-1":  { eq1: top("A",1),  eq2: top("B",1)  },  // M73 AfSud/Can
+      "R32-2":  { eq1: top("C",0),  eq2: top("F",1)  },  // M76 Brésil/Jap
+      "R32-3":  { eq1: top("E",0),  eq2: t(0)        },  // M74 All/Par
+      "R32-4":  { eq1: top("F",0),  eq2: top("C",1)  },  // M75 PB/Maroc
+      "R32-5":  { eq1: top("E",1),  eq2: top("I",1)  },  // M78 CdI/Nor
+      "R32-6":  { eq1: top("I",0),  eq2: t(1)        },  // M77 Fra/Suède
+      "R32-7":  { eq1: top("A",0),  eq2: t(2)        },  // M79 Mex/Éq
+      "R32-8":  { eq1: top("L",0),  eq2: t(3)        },  // M80 Ang/RDC
+      "R32-9":  { eq1: top("G",0),  eq2: t(4)        },  // M82 Bel/Sén
+      "R32-10": { eq1: top("D",0),  eq2: t(5)        },  // M81 USA/Bos
+      "R32-11": { eq1: top("H",0),  eq2: top("J",1)  },  // M84 Esp/Aut
+      "R32-12": { eq1: top("K",1),  eq2: top("L",1)  },  // M87 Col/Ghana
+      "R32-13": { eq1: top("B",0),  eq2: t(6)        },  // M85 Sui/Alg
+      "R32-14": { eq1: top("D",1),  eq2: top("G",1)  },  // M88 Aus/Égy
+      "R32-15": { eq1: top("J",0),  eq2: top("H",1)  },  // M86 Arg/CV
+      "R32-16": { eq1: top("K",0),  eq2: t(7)        },  // M83 Por/Cro
     };
     const winner = (id, eqs) => {
       const s = scores[id];
       if (!s) return null;
-      const g1 = parseInt(s.g1, 10),
-        g2 = parseInt(s.g2, 10);
-      if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return null;
-      if (g1 === g2) return null;
-      return g1 > g2 ? eqs.eq1 : eqs.eq2;
+      const g1 = parseInt(s.g1, 10), g2 = parseInt(s.g2, 10);
+      if (isNaN(g1)||isNaN(g2)||s.g1===''||s.g2==='') return null;
+      if (g1===g2) return null;
+      return g1>g2 ? eqs.eq1 : eqs.eq2;
     };
     const loser = (id, eqs) => {
       const s = scores[id];
       if (!s) return null;
-      const g1 = parseInt(s.g1, 10),
-        g2 = parseInt(s.g2, 10);
-      if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return null;
-      if (g1 === g2) return null;
-      return g1 > g2 ? eqs.eq2 : eqs.eq1;
+      const g1 = parseInt(s.g1, 10), g2 = parseInt(s.g2, 10);
+      if (isNaN(g1)||isNaN(g2)||s.g1===''||s.g2==='') return null;
+      if (g1===g2) return null;
+      return g1>g2 ? eqs.eq2 : eqs.eq1;
     };
+
+    // R16 (1/8) — croisements conformes au tableau officiel FIFA
+    // GAUCHE → SF-1 (14 juil) : M89,M90,M93,M94
+    // DROITE → SF-2 (15 juil) : M91,M92,M95,M96
     const r16 = {
-      "R16-1": {
-        eq1: winner("R32-1", r32["R32-1"]),
-        eq2: winner("R32-2", r32["R32-2"])
-      },
-      "R16-2": {
-        eq1: winner("R32-3", r32["R32-3"]),
-        eq2: winner("R32-4", r32["R32-4"])
-      },
-      "R16-3": {
-        eq1: winner("R32-5", r32["R32-5"]),
-        eq2: winner("R32-6", r32["R32-6"])
-      },
-      "R16-4": {
-        eq1: winner("R32-7", r32["R32-7"]),
-        eq2: winner("R32-8", r32["R32-8"])
-      },
-      "R16-5": {
-        eq1: winner("R32-9", r32["R32-9"]),
-        eq2: winner("R32-10", r32["R32-10"])
-      },
-      "R16-6": {
-        eq1: winner("R32-11", r32["R32-11"]),
-        eq2: winner("R32-12", r32["R32-12"])
-      },
-      "R16-7": {
-        eq1: winner("R32-13", r32["R32-13"]),
-        eq2: winner("R32-14", r32["R32-14"])
-      },
-      "R16-8": {
-        eq1: winner("R32-15", r32["R32-15"]),
-        eq2: winner("R32-16", r32["R32-16"])
-      }
+      "R16-M89": { eq1: winner("R32-3",r32["R32-3"]), eq2: winner("R32-6",r32["R32-6"]) }, // All/Par vs Fra/Suède
+      "R16-M90": { eq1: winner("R32-1",r32["R32-1"]), eq2: winner("R32-4",r32["R32-4"]) }, // AfSud/Can vs PB/Maroc
+      "R16-M91": { eq1: winner("R32-2",r32["R32-2"]), eq2: winner("R32-5",r32["R32-5"]) }, // Bré/Jap vs CdI/Nor
+      "R16-M92": { eq1: winner("R32-7",r32["R32-7"]), eq2: winner("R32-8",r32["R32-8"]) }, // Mex/Éq vs Ang/RDC
+      "R16-M93": { eq1: winner("R32-16",r32["R32-16"]),eq2: winner("R32-11",r32["R32-11"]) },// Por/Cro vs Esp/Aut
+      "R16-M94": { eq1: winner("R32-10",r32["R32-10"]),eq2: winner("R32-9",r32["R32-9"])  }, // USA/Bos vs Bel/Sén
+      "R16-M95": { eq1: winner("R32-15",r32["R32-15"]),eq2: winner("R32-14",r32["R32-14"]) },// Arg/CV vs Aus/Égy
+      "R16-M96": { eq1: winner("R32-13",r32["R32-13"]),eq2: winner("R32-12",r32["R32-12"]) },// Sui/Alg vs Col/Ghana
     };
     const qf = {
-      "QF-1": {
-        eq1: winner("R16-1", r16["R16-1"]),
-        eq2: winner("R16-2", r16["R16-2"])
-      },
-      "QF-2": {
-        eq1: winner("R16-3", r16["R16-3"]),
-        eq2: winner("R16-4", r16["R16-4"])
-      },
-      "QF-3": {
-        eq1: winner("R16-5", r16["R16-5"]),
-        eq2: winner("R16-6", r16["R16-6"])
-      },
-      "QF-4": {
-        eq1: winner("R16-7", r16["R16-7"]),
-        eq2: winner("R16-8", r16["R16-8"])
-      }
+      "QF-M97":  { eq1: winner("R16-M89",r16["R16-M89"]), eq2: winner("R16-M90",r16["R16-M90"]) },
+      "QF-M98":  { eq1: winner("R16-M93",r16["R16-M93"]), eq2: winner("R16-M94",r16["R16-M94"]) },
+      "QF-M99":  { eq1: winner("R16-M91",r16["R16-M91"]), eq2: winner("R16-M92",r16["R16-M92"]) },
+      "QF-M100": { eq1: winner("R16-M95",r16["R16-M95"]), eq2: winner("R16-M96",r16["R16-M96"]) },
     };
     const sf = {
-      "SF-1": {
-        eq1: winner("QF-1", qf["QF-1"]),
-        eq2: winner("QF-2", qf["QF-2"])
-      },
-      "SF-2": {
-        eq1: winner("QF-3", qf["QF-3"]),
-        eq2: winner("QF-4", qf["QF-4"])
-      }
+      "SF-M101": { eq1: winner("QF-M97",qf["QF-M97"]),  eq2: winner("QF-M98",qf["QF-M98"])  },
+      "SF-M102": { eq1: winner("QF-M99",qf["QF-M99"]),  eq2: winner("QF-M100",qf["QF-M100"]) },
     };
     const p3 = {
-      "3PL": {
-        eq1: loser("SF-1", sf["SF-1"]),
-        eq2: loser("SF-2", sf["SF-2"])
-      }
+      "3PL": { eq1: loser("SF-M101",sf["SF-M101"]), eq2: loser("SF-M102",sf["SF-M102"]) }
     };
     const fin = {
-      "FIN": {
-        eq1: winner("SF-1", sf["SF-1"]),
-        eq2: winner("SF-2", sf["SF-2"])
-      }
+      "FIN": { eq1: winner("SF-M101",sf["SF-M101"]), eq2: winner("SF-M102",sf["SF-M102"]) }
     };
-    return {
-      r32,
-      r16,
-      qf,
-      sf,
-      p3,
-      fin
-    };
+    return { r32, r16, qf, sf, p3, fin };
   }
 
   // ─── COMPOSANTS ──────────────────────────────────────────────────────────────
@@ -1682,79 +1584,37 @@ try {
   // ─── COMPOSANT BRACKET V4 — ES5 pur, sans template literals, sans arrow fn ─────
 function BracketTab(props) {
   var scores = props.scores;
-  var thirds = props.thirds || [];
-  function t(i) { return (thirds[i] && thirds[i].trim()) ? thirds[i].trim() : null; }
+  var allBracket = props.allBracket || {};
 
-  // Mapping IDs FIFA → IDs scores appli
-  var FIFA_TO_APP = {
-    "M73": "R32-1",
-    "M74": "R32-3",
-    "M75": "R32-4",
-    "M76": "R32-2",
-    "M77": "R32-6",
-    "M78": "R32-5",
-    "M79": "R32-7",
-    "M80": "R32-8",
-    "M81": "R32-10",
-    "M82": "R32-9",
-    "M83": "R32-12",
-    "M84": "R32-11",
-    "M85": "R32-13",
-    "M86": "R32-16",
-    "M87": "R32-15",
-    "M88": "R32-14",
-    "M89": "R16-2",   // 4 juil 23h Dallas = All/Par vs Fra/Suède
-    "M90": "R16-1",   // 4 juil 20h MetLife = AfSud/Can vs PB/Maroc
-    "M91": "R16-3",   // 5 juil 22h Boston = Brésil/Jap vs CdI/Nor
-    "M92": "R16-4",   // 6 juil 2h Atlanta = Mex/Éq vs Ang/RDC
-    "M93": "R16-5",   // 6 juil 21h Miami = Por/Cro vs Esp/Aut
-    "M94": "R16-6",   // 7 juil 2h Philadelphie = USA/Bos vs Bel/Sén
-    "M95": "R16-7",   // 7 juil 18h Kansas City = Arg/CV vs Égy/Aus
-    "M96": "R16-8",   // 7 juil 22h LA = Sui/Alg vs Col/Ghana
-    "M97": "QF-1",
-    "M98": "QF-2",
-    "M99": "QF-3",
-    "M100": "QF-4",
-    "M101": "SF-1",
-    "M102": "SF-2",
-    "FIN": "FIN",
-    "M103": "3PL"
-  };
-  function sc(fifaId) {
+  // Lecture directe dans allBracket (calculé par computeBracket avec vrais croisements FIFA)
+  // allBracket contient : R32-x, R16-Mxx, QF-Mxx, SF-Mxx, 3PL, FIN
+  function sc(appId) {
+    return (appId && scores[appId]) ? scores[appId] : {g1:"",g2:""};
+  }
+  function eqsOf(appId) {
+    return allBracket[appId] || {eq1:null, eq2:null};
+  }
+    function sc(fifaId) {
     var appId = FIFA_TO_APP[fifaId];
     return appId && scores[appId] ? scores[appId] : {
       g1: "",
       g2: ""
     };
   }
-  function wonMatch(id, eq1, eq2) {
-    var s = sc(id);
-    var g1 = parseInt(s.g1, 10),
-      g2 = parseInt(s.g2, 10);
-    if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return null;
-    if (g1 === g2) return null;
-    return g1 > g2 ? eq1 : eq2;
+  // Lecture directe depuis allBracket (calculé par computeBracket avec vrais croisements FIFA)
+  // IDs : R32-x, R16-Mxx, QF-Mxx, SF-Mxx, 3PL, FIN
+  function isWin(appId, side) {
+    var s = sc(appId);
+    var g1=parseInt(s.g1,10), g2=parseInt(s.g2,10);
+    if(isNaN(g1)||isNaN(g2)||s.g1===''||s.g2==='') return false;
+    return side===1 ? g1>g2 : g2>g1;
   }
-  function lostMatch(id, eq1, eq2) {
-    var s = sc(id);
-    var g1 = parseInt(s.g1, 10),
-      g2 = parseInt(s.g2, 10);
-    if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return null;
-    if (g1 === g2) return null;
-    return g1 > g2 ? eq2 : eq1;
-  }
-  function isWin(fifaId, side) {
-    var s = sc(fifaId);
-    var g1 = parseInt(s.g1, 10),
-      g2 = parseInt(s.g2, 10);
-    if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return false;
-    return side === 1 ? g1 > g2 : g2 > g1;
-  }
+  // Équipes des rounds : lire directement dans allBracket
+  function eq1of(appId) { return eqsOf(appId).eq1; }
+  function eq2of(appId) { return eqsOf(appId).eq2; }
 
-  // Affiches officielles 1/16 — source : tableau FIFA officiel (image confirmée 28 juin 2026)
-  // Équipes en dur — pas de dépendance aux slots thirds[]
+  // Données fixes pour le visuel (équipes des 1/16 codées en dur)
   var ML = {
-    // CÔTÉ GAUCHE
     73: { eq1:"🇿🇦 Afrique du Sud",  eq2:"🇨🇦 Canada" },
     74: { eq1:"🇩🇪 Allemagne",       eq2:"🇵🇾 Paraguay" },
     75: { eq1:"🇳🇱 Pays-Bas",        eq2:"🇲🇦 Maroc" },
@@ -1772,97 +1632,37 @@ function BracketTab(props) {
     87: { eq1:"🇨🇴 Colombie",        eq2:"🇬🇭 Ghana" },
     88: { eq1:"🇦🇺 Australie",       eq2:"🇪🇬 Égypte" },
   };
-  function w32(n) {
-    return wonMatch("M" + n, ML[n].eq1, ML[n].eq2);
-  }
-
-  // 1/8 officiels (source FIFA/Wikipedia/L'Equipe)
-  // M89=W74+W77, M90=W73+W75, M91=W76+W78, M92=W79+W80
-  // M93=W83+W84, M94=W81+W82, M95=W86+W88, M96=W85+W87
-  var r16 = {
-    89: {
-      eq1: w32(74),
-      eq2: w32(77)
-    },
-    90: {
-      eq1: w32(73),
-      eq2: w32(75)
-    },
-    91: {
-      eq1: w32(76),
-      eq2: w32(78)
-    },
-    92: {
-      eq1: w32(79),
-      eq2: w32(80)
-    },
-    93: {
-      eq1: w32(83),
-      eq2: w32(84)
-    },
-    94: {
-      eq1: w32(81),
-      eq2: w32(82)
-    },
-    95: {
-      eq1: w32(86),
-      eq2: w32(88)
-    },
-    96: {
-      eq1: w32(85),
-      eq2: w32(87)
-    }
-  };
-  function w16(n) {
-    return wonMatch("M" + n, r16[n].eq1, r16[n].eq2);
-  }
-
-  // Quarts
-  // M97=W89+W90, M98=W91+W92, M99=W93+W94, M100=W95+W96
-  var qf = {
-    97: {
-      eq1: w16(89),
-      eq2: w16(90)
-    },
-    98: {
-      eq1: w16(91),
-      eq2: w16(92)
-    },
-    99: {
-      eq1: w16(93),
-      eq2: w16(94)
-    },
-    100: {
-      eq1: w16(95),
-      eq2: w16(96)
-    }
-  };
-  function wqf(n) {
-    return wonMatch("M" + n, qf[n].eq1, qf[n].eq2);
-  }
-
-  // Demis
-  // M101=W97+W98 (gauche), M102=W99+W100 (droite)
-  var sf = {
-    101: {
-      eq1: wqf(97),
-      eq2: wqf(98)
-    },
-    102: {
-      eq1: wqf(99),
-      eq2: wqf(100)
-    }
-  };
-  function wsf(n) {
-    return wonMatch("M" + n, sf[n].eq1, sf[n].eq2);
-  }
-  function lsf(n) {
-    return lostMatch("M" + n, sf[n].eq1, sf[n].eq2);
-  }
-  var FIN_eq1 = wsf(101),
-    FIN_eq2 = wsf(102);
-  var P3_eq1 = lsf(101),
-    P3_eq2 = lsf(102);
+  // Mapping numéro FIFA → ID appli pour les R32
+  var R32_APP = {73:"R32-1",74:"R32-3",75:"R32-4",76:"R32-2",77:"R32-6",78:"R32-5",
+                 79:"R32-7",80:"R32-8",81:"R32-10",82:"R32-9",83:"R32-16",84:"R32-11",
+                 85:"R32-13",86:"R32-15",87:"R32-12",88:"R32-14"};
+  // Équipes R16/QF/SF lues directement depuis allBracket
+  // GAUCHE : M89,M90,M93,M94 → R16-M89,R16-M90,R16-M93,R16-M94
+  // DROITE : M91,M92,M95,M96 → R16-M91,R16-M92,R16-M95,R16-M96
+  var L16_DATA = [
+    {id:"R16-M89", eq1:eq1of("R16-M89"), eq2:eq2of("R16-M89")},
+    {id:"R16-M90", eq1:eq1of("R16-M90"), eq2:eq2of("R16-M90")},
+    {id:"R16-M93", eq1:eq1of("R16-M93"), eq2:eq2of("R16-M93")},
+    {id:"R16-M94", eq1:eq1of("R16-M94"), eq2:eq2of("R16-M94")},
+  ];
+  var R16_DATA = [
+    {id:"R16-M91", eq1:eq1of("R16-M91"), eq2:eq2of("R16-M91")},
+    {id:"R16-M92", eq1:eq1of("R16-M92"), eq2:eq2of("R16-M92")},
+    {id:"R16-M95", eq1:eq1of("R16-M95"), eq2:eq2of("R16-M95")},
+    {id:"R16-M96", eq1:eq1of("R16-M96"), eq2:eq2of("R16-M96")},
+  ];
+  var LQF_DATA = [
+    {id:"QF-M97",  eq1:eq1of("QF-M97"),  eq2:eq2of("QF-M97")},
+    {id:"QF-M98",  eq1:eq1of("QF-M98"),  eq2:eq2of("QF-M98")},
+  ];
+  var RQF_DATA = [
+    {id:"QF-M99",  eq1:eq1of("QF-M99"),  eq2:eq2of("QF-M99")},
+    {id:"QF-M100", eq1:eq1of("QF-M100"), eq2:eq2of("QF-M100")},
+  ];
+  var SF1_DATA = {id:"SF-M101", eq1:eq1of("SF-M101"), eq2:eq2of("SF-M101")};
+  var SF2_DATA = {id:"SF-M102", eq1:eq1of("SF-M102"), eq2:eq2of("SF-M102")};
+  var FIN_eq1 = eq1of("FIN"), FIN_eq2 = eq2of("FIN");
+  var P3_eq1  = eq1of("3PL"), P3_eq2  = eq2of("3PL");
 
   // ── Dimensions SVG ──────────────────────────────────────────────────────────
   var CW = 150,
@@ -1998,15 +1798,15 @@ function BracketTab(props) {
   var DR_CONN = [[0,0],[1,0],[2,1],[3,1],[4,2],[5,2],[6,3],[7,3]];
 
   // IDs R16 gauche/droite pour les matchs (pour score)
-  var L16_IDS = ["M89", "M90", "M93", "M94"];
-  var R16_IDS = ["M91", "M92", "M95", "M96"];
-  var LQF_IDS = ["M97", "M98"];
-  var RQF_IDS = ["M99", "M100"];
+  var L16_IDS = ["R16-M89", "R16-M90", "R16-M93", "R16-M94"];
+  var R16_IDS = ["R16-M91", "R16-M92", "R16-M95", "R16-M96"];
+  var LQF_IDS = ["QF-M97", "QF-M98"];
+  var RQF_IDS = ["QF-M99", "QF-M100"];
   var els = [];
 
   // R32 GAUCHE
   LO.forEach(function (n, i) {
-    els.push(Match("M" + n, ML[n].eq1, ML[n].eq2, xL0, yR32(i), TC.r32));
+    els.push(Match(R32_APP[n], ML[n].eq1, ML[n].eq2, xL0, yR32(i), TC.r32));
     els.push(React.createElement("text", {
       key: "ll" + n,
       x: xL0 + CW + 2,
@@ -2055,7 +1855,7 @@ function BracketTab(props) {
   });
 
   // SF GAUCHE
-  els.push(Match("M101", sf[101].eq1 || "À déterm.", sf[101].eq2 || "À déterm.", xL3, yLsf(), TC.sf));
+  els.push(Match("SF-M101", sf["SF-M101"].eq1 || "À déterm.", sf["SF-M101"].eq2 || "À déterm.", xL3, yLsf(), TC.sf));
   els.push(Conn("clsf", xL3 + CW, yLsf(), xFIN, yFIN - CH - GAP / 2, TC.sf));
 
   // FINALE centre
@@ -2220,13 +2020,13 @@ function BracketTab(props) {
   var xBraceSFR = xR3 - 16;
   els.push(React.createElement("line",{key:"brsfrl",x1:xR3,y1:yRsf(),x2:xBraceSFR,y2:yRsf(),stroke:TC.sf+"55",strokeWidth:1.5}));
   els.push(Conn("crsf", xBraceSFR, yRsf(), xFIN + CW, yFIN, TC.sf));
-  els.push(Match("M102", sf[102].eq1 || "À déterm.", sf[102].eq2 || "À déterm.", xR3, yRsf(), TC.sf));
+  els.push(Match("SF-M102", sf["SF-M102"].eq1 || "À déterm.", sf["SF-M102"].eq2 || "À déterm.", xR3, yRsf(), TC.sf));
 
   // QF DROITE avec accolades symétriques
-  var rqfeqs = [{eq1:qf[99].eq1,eq2:qf[99].eq2},{eq1:qf[100].eq1,eq2:qf[100].eq2}];
+  var rqfeqs = [{eq1:qf["QF-M99"].eq1,eq2:qf["QF-M99"].eq2},{eq1:qf["QF-M100"].eq1,eq2:qf["QF-M100"].eq2}];
   var xBraceQFR = xR2 - 16;
-  RQF_IDS.forEach(function(id, i) {
-    els.push(Match(id, rqfeqs[i].eq1||"À déterm.", rqfeqs[i].eq2||"À déterm.", xR2, yRqf(i), TC.qf));
+  RQF_DATA.forEach(function(m, i) {
+    els.push(Match(m.id, m.eq1||"À déterm.", m.eq2||"À déterm.", xR2, yRqf(i), TC.qf));
     // Accolade gauche QF droit
     els.push(React.createElement("line",{key:"brqfl-"+i,x1:xR2,y1:yRqf(i),x2:xBraceQFR,y2:yRqf(i),stroke:TC.qf+"55",strokeWidth:1.5}));
     if(i===0){
@@ -2236,10 +2036,10 @@ function BracketTab(props) {
   });
 
   // R16 DROITE avec accolades symétriques (M91,M92,M95,M96)
-  var r16eqs = [{eq1:r16[91].eq1,eq2:r16[91].eq2},{eq1:r16[92].eq1,eq2:r16[92].eq2},{eq1:r16[95].eq1,eq2:r16[95].eq2},{eq1:r16[96].eq1,eq2:r16[96].eq2}];
+  var r16eqs = [{eq1:r16["R16-M91"].eq1,eq2:r16["R16-M91"].eq2},{eq1:r16["R16-M92"].eq1,eq2:r16["R16-M92"].eq2},{eq1:r16["R16-M95"].eq1,eq2:r16["R16-M95"].eq2},{eq1:r16["R16-M96"].eq1,eq2:r16["R16-M96"].eq2}];
   var xBraceR16 = xR1 - 16;
-  R16_IDS.forEach(function(id, i) {
-    els.push(Match(id, r16eqs[i].eq1||"À déterm.", r16eqs[i].eq2||"À déterm.", xR1, yR16(i), TC.r16));
+  R16_DATA.forEach(function(m, i) {
+    els.push(Match(m.id, m.eq1||"À déterm.", m.eq2||"À déterm.", xR1, yR16(i), TC.r16));
     // Accolade gauche R16 droit
     els.push(React.createElement("line",{key:"br16l-"+i,x1:xR1,y1:yR16(i),x2:xBraceR16,y2:yR16(i),stroke:TC.r16+"55",strokeWidth:1.5}));
     if(i%2===0){
@@ -2250,7 +2050,7 @@ function BracketTab(props) {
 
   // R32 DROITE avec accolades symétriques (connexions depuis bord GAUCHE des cartes)
   RO.forEach(function (n, i) {
-    els.push(Match("M" + n, ML[n].eq1, ML[n].eq2, xR0, yR32(i), TC.r32));
+    els.push(Match(R32_APP[n], ML[n].eq1, ML[n].eq2, xR0, yR32(i), TC.r32));
   });
   // Accolades côté droit : chaque paire converge vers un point central AVANT la carte R16
   // Le point de convergence est à mi-chemin entre xR1+CW et xR0, côté gauche de xR0
@@ -3453,7 +3253,8 @@ function ThirdsTab({
       scores: scores
     }), tab === "bracket" && /*#__PURE__*/React.createElement(BracketTab, {
       scores: scores,
-      thirds: thirds
+      thirds: thirds,
+      allBracket: allBracket
     }), tab === "agenda" && /*#__PURE__*/React.createElement(AgendaTab, {
       scores: scores,
       allBracket: allBracket
