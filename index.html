@@ -1113,82 +1113,73 @@ try {
     })).sort((a, b) => b.pts - a.pts || b.diff - a.diff || b.bp - a.bp);
   }
 
-  // ─── MOTEUR BRACKET ──────────────────────────────────────────────────────────
-  // Croisements R16 conformes au tableau officiel FIFA 2026
+  // ─── MOTEUR BRACKET — croisements officiels FIFA 2026 ──────────────────────
   function computeBracket(scores, thirds) {
-    const t = i => thirds[i] && thirds[i].trim() ? thirds[i].trim() : null;
-    const standings = {};
-    Object.keys(GROUPES).forEach(g => {
-      standings[g] = computeStandings(g, scores);
-    });
-    const top = (g, rank) => standings[g][rank] ? standings[g][rank].name : null;
+    var t = function(i) { return thirds[i] && thirds[i].trim() ? thirds[i].trim() : null; };
+    var standings = {};
+    Object.keys(GROUPES).forEach(function(g) { standings[g] = computeStandings(g, scores); });
+    var top = function(g, rank) { return standings[g][rank] ? standings[g][rank].name : null; };
 
-    // R32 (1/16) — identiques à avant
-    const r32 = {
-      "R32-1":  { eq1: top("A",1),  eq2: top("B",1)  },  // M73 AfSud/Can
-      "R32-2":  { eq1: top("C",0),  eq2: top("F",1)  },  // M76 Brésil/Jap
-      "R32-3":  { eq1: top("E",0),  eq2: t(0)        },  // M74 All/Par
-      "R32-4":  { eq1: top("F",0),  eq2: top("C",1)  },  // M75 PB/Maroc
-      "R32-5":  { eq1: top("E",1),  eq2: top("I",1)  },  // M78 CdI/Nor
-      "R32-6":  { eq1: top("I",0),  eq2: t(1)        },  // M77 Fra/Suède
-      "R32-7":  { eq1: top("A",0),  eq2: t(2)        },  // M79 Mex/Éq
-      "R32-8":  { eq1: top("L",0),  eq2: t(3)        },  // M80 Ang/RDC
-      "R32-9":  { eq1: top("G",0),  eq2: t(4)        },  // M82 Bel/Sén
-      "R32-10": { eq1: top("D",0),  eq2: t(5)        },  // M81 USA/Bos
-      "R32-11": { eq1: top("H",0),  eq2: top("J",1)  },  // M84 Esp/Aut
-      "R32-12": { eq1: top("K",1),  eq2: top("L",1)  },  // M87 Col/Ghana
-      "R32-13": { eq1: top("B",0),  eq2: t(6)        },  // M85 Sui/Alg
-      "R32-14": { eq1: top("D",1),  eq2: top("G",1)  },  // M88 Aus/Égy
-      "R32-15": { eq1: top("J",0),  eq2: top("H",1)  },  // M86 Arg/CV
-      "R32-16": { eq1: top("K",0),  eq2: t(7)        },  // M83 Por/Cro
+    var r32 = {
+      "R32-1":  { eq1: top("A",1),  eq2: top("B",1)  },
+      "R32-2":  { eq1: top("C",0),  eq2: top("F",1)  },
+      "R32-3":  { eq1: top("E",0),  eq2: t(0)        },
+      "R32-4":  { eq1: top("F",0),  eq2: top("C",1)  },
+      "R32-5":  { eq1: top("E",1),  eq2: top("I",1)  },
+      "R32-6":  { eq1: top("I",0),  eq2: t(1)        },
+      "R32-7":  { eq1: top("A",0),  eq2: t(2)        },
+      "R32-8":  { eq1: top("L",0),  eq2: t(3)        },
+      "R32-9":  { eq1: top("G",0),  eq2: t(4)        },
+      "R32-10": { eq1: top("D",0),  eq2: t(5)        },
+      "R32-11": { eq1: top("H",0),  eq2: top("J",1)  },
+      "R32-12": { eq1: top("K",1),  eq2: top("L",1)  },
+      "R32-13": { eq1: top("B",0),  eq2: t(6)        },
+      "R32-14": { eq1: top("D",1),  eq2: top("G",1)  },
+      "R32-15": { eq1: top("J",0),  eq2: top("H",1)  },
+      "R32-16": { eq1: top("K",0),  eq2: t(7)        },
     };
-    const winner = (id, eqs) => {
-      const s = scores[id];
-      if (!s) return null;
-      const g1 = parseInt(s.g1, 10), g2 = parseInt(s.g2, 10);
+
+    function winner(id, eqs) {
+      var s = scores[id]; if (!s) return null;
+      var g1 = parseInt(s.g1,10), g2 = parseInt(s.g2,10);
       if (isNaN(g1)||isNaN(g2)||s.g1===''||s.g2==='') return null;
       if (g1===g2) return null;
       return g1>g2 ? eqs.eq1 : eqs.eq2;
-    };
-    const loser = (id, eqs) => {
-      const s = scores[id];
-      if (!s) return null;
-      const g1 = parseInt(s.g1, 10), g2 = parseInt(s.g2, 10);
+    }
+    function loser(id, eqs) {
+      var s = scores[id]; if (!s) return null;
+      var g1 = parseInt(s.g1,10), g2 = parseInt(s.g2,10);
       if (isNaN(g1)||isNaN(g2)||s.g1===''||s.g2==='') return null;
       if (g1===g2) return null;
       return g1>g2 ? eqs.eq2 : eqs.eq1;
-    };
+    }
 
-    // R16 (1/8) — croisements conformes au tableau officiel FIFA
-    // GAUCHE → SF-1 (14 juil) : M89,M90,M93,M94
-    // DROITE → SF-2 (15 juil) : M91,M92,M95,M96
-    const r16 = {
-      "R16-M89": { eq1: winner("R32-3",r32["R32-3"]), eq2: winner("R32-6",r32["R32-6"]) }, // All/Par vs Fra/Suède
-      "R16-M90": { eq1: winner("R32-1",r32["R32-1"]), eq2: winner("R32-4",r32["R32-4"]) }, // AfSud/Can vs PB/Maroc
-      "R16-M91": { eq1: winner("R32-2",r32["R32-2"]), eq2: winner("R32-5",r32["R32-5"]) }, // Bré/Jap vs CdI/Nor
-      "R16-M92": { eq1: winner("R32-7",r32["R32-7"]), eq2: winner("R32-8",r32["R32-8"]) }, // Mex/Éq vs Ang/RDC
-      "R16-M93": { eq1: winner("R32-16",r32["R32-16"]),eq2: winner("R32-11",r32["R32-11"]) },// Por/Cro vs Esp/Aut
-      "R16-M94": { eq1: winner("R32-10",r32["R32-10"]),eq2: winner("R32-9",r32["R32-9"])  }, // USA/Bos vs Bel/Sén
-      "R16-M95": { eq1: winner("R32-15",r32["R32-15"]),eq2: winner("R32-14",r32["R32-14"]) },// Arg/CV vs Aus/Égy
-      "R16-M96": { eq1: winner("R32-13",r32["R32-13"]),eq2: winner("R32-12",r32["R32-12"]) },// Sui/Alg vs Col/Ghana
+    // R16 — croisements officiels FIFA (source : tableau L'Équipe 28 juin 2026)
+    // GAUCHE→SF-M101: M89=W(R32-3)vsW(R32-6), M90=W(R32-1)vsW(R32-4), M93=W(R32-16)vsW(R32-11), M94=W(R32-10)vsW(R32-9)
+    // DROITE→SF-M102: M91=W(R32-2)vsW(R32-5), M92=W(R32-7)vsW(R32-8), M95=W(R32-15)vsW(R32-14), M96=W(R32-13)vsW(R32-12)
+    var r16 = {
+      "R16-M89": { eq1: winner("R32-3",r32["R32-3"]),  eq2: winner("R32-6",r32["R32-6"])  },
+      "R16-M90": { eq1: winner("R32-1",r32["R32-1"]),  eq2: winner("R32-4",r32["R32-4"])  },
+      "R16-M91": { eq1: winner("R32-2",r32["R32-2"]),  eq2: winner("R32-5",r32["R32-5"])  },
+      "R16-M92": { eq1: winner("R32-7",r32["R32-7"]),  eq2: winner("R32-8",r32["R32-8"])  },
+      "R16-M93": { eq1: winner("R32-16",r32["R32-16"]), eq2: winner("R32-11",r32["R32-11"]) },
+      "R16-M94": { eq1: winner("R32-10",r32["R32-10"]), eq2: winner("R32-9",r32["R32-9"])  },
+      "R16-M95": { eq1: winner("R32-15",r32["R32-15"]), eq2: winner("R32-14",r32["R32-14"]) },
+      "R16-M96": { eq1: winner("R32-13",r32["R32-13"]), eq2: winner("R32-12",r32["R32-12"]) },
     };
-    const qf = {
+    var qf = {
       "QF-M97":  { eq1: winner("R16-M89",r16["R16-M89"]), eq2: winner("R16-M90",r16["R16-M90"]) },
       "QF-M98":  { eq1: winner("R16-M93",r16["R16-M93"]), eq2: winner("R16-M94",r16["R16-M94"]) },
       "QF-M99":  { eq1: winner("R16-M91",r16["R16-M91"]), eq2: winner("R16-M92",r16["R16-M92"]) },
       "QF-M100": { eq1: winner("R16-M95",r16["R16-M95"]), eq2: winner("R16-M96",r16["R16-M96"]) },
     };
-    const sf = {
+    var sf = {
       "SF-M101": { eq1: winner("QF-M97",qf["QF-M97"]),  eq2: winner("QF-M98",qf["QF-M98"])  },
       "SF-M102": { eq1: winner("QF-M99",qf["QF-M99"]),  eq2: winner("QF-M100",qf["QF-M100"]) },
     };
-    const p3 = {
-      "3PL": { eq1: loser("SF-M101",sf["SF-M101"]), eq2: loser("SF-M102",sf["SF-M102"]) }
-    };
-    const fin = {
-      "FIN": { eq1: winner("SF-M101",sf["SF-M101"]), eq2: winner("SF-M102",sf["SF-M102"]) }
-    };
-    return { r32, r16, qf, sf, p3, fin };
+    var p3  = { "3PL": { eq1: loser("SF-M101",sf["SF-M101"]), eq2: loser("SF-M102",sf["SF-M102"]) } };
+    var fin = { "FIN": { eq1: winner("SF-M101",sf["SF-M101"]), eq2: winner("SF-M102",sf["SF-M102"]) } };
+    return { r32: r32, r16: r16, qf: qf, sf: sf, p3: p3, fin: fin };
   }
 
   // ─── COMPOSANTS ──────────────────────────────────────────────────────────────
@@ -1581,88 +1572,128 @@ try {
   }
 
   // ─── COMPOSANT AGENDA ────────────────────────────────────────────────────────
-  // ─── COMPOSANT BRACKET V4 — ES5 pur, sans template literals, sans arrow fn ─────
+  // ─── COMPOSANT BRACKET V5 — allBracket direct, ES5+JSX propre ─────────────
+// BracketTab V5 — utilise allBracket passé en props (calculé par computeBracket FIFA)
 function BracketTab(props) {
   var scores = props.scores;
-  var allBracket = props.allBracket || {};
+  var AB = props.allBracket || {}; // allBracket contient R32-x, R16-Mxx, QF-Mxx, SF-Mxx, 3PL, FIN
 
-  // Lecture directe dans allBracket (calculé par computeBracket avec vrais croisements FIFA)
-  // allBracket contient : R32-x, R16-Mxx, QF-Mxx, SF-Mxx, 3PL, FIN
-  function sc(appId) {
-    return (appId && scores[appId]) ? scores[appId] : {g1:"",g2:""};
-  }
-  function eqsOf(appId) {
-    return allBracket[appId] || {eq1:null, eq2:null};
-  }
-    function sc(fifaId) {
-    var appId = FIFA_TO_APP[fifaId];
-    return appId && scores[appId] ? scores[appId] : {
+  function sc(id) {
+    return id && scores[id] ? scores[id] : {
       g1: "",
       g2: ""
     };
   }
-  // Lecture directe depuis allBracket (calculé par computeBracket avec vrais croisements FIFA)
-  // IDs : R32-x, R16-Mxx, QF-Mxx, SF-Mxx, 3PL, FIN
-  function isWin(appId, side) {
-    var s = sc(appId);
-    var g1=parseInt(s.g1,10), g2=parseInt(s.g2,10);
-    if(isNaN(g1)||isNaN(g2)||s.g1===''||s.g2==='') return false;
-    return side===1 ? g1>g2 : g2>g1;
+  function eq1(id) {
+    return AB[id] ? AB[id].eq1 : null;
   }
-  // Équipes des rounds : lire directement dans allBracket
-  function eq1of(appId) { return eqsOf(appId).eq1; }
-  function eq2of(appId) { return eqsOf(appId).eq2; }
+  function eq2(id) {
+    return AB[id] ? AB[id].eq2 : null;
+  }
+  function isWin(id, side) {
+    var s = sc(id);
+    var g1 = parseInt(s.g1, 10),
+      g2 = parseInt(s.g2, 10);
+    if (isNaN(g1) || isNaN(g2) || s.g1 === '' || s.g2 === '') return false;
+    return side === 1 ? g1 > g2 : g2 > g1;
+  }
 
-  // Données fixes pour le visuel (équipes des 1/16 codées en dur)
+  // Équipes des 1/16 — en dur, confirmées tableau officiel FIFA
   var ML = {
-    73: { eq1:"🇿🇦 Afrique du Sud",  eq2:"🇨🇦 Canada" },
-    74: { eq1:"🇩🇪 Allemagne",       eq2:"🇵🇾 Paraguay" },
-    75: { eq1:"🇳🇱 Pays-Bas",        eq2:"🇲🇦 Maroc" },
-    76: { eq1:"🇧🇷 Brésil",          eq2:"🇯🇵 Japon" },
-    77: { eq1:"🇫🇷 France",          eq2:"🇸🇪 Suède" },
-    78: { eq1:"🇨🇮 Côte d'Ivoire",  eq2:"🇳🇴 Norvège" },
-    79: { eq1:"🇲🇽 Mexique",         eq2:"🇪🇨 Équateur" },
-    80: { eq1:"🏴 Angleterre",       eq2:"🇨🇩 RD Congo" },
-    81: { eq1:"🇺🇸 États-Unis",      eq2:"🇧🇦 Bosnie-Herzégovine" },
-    82: { eq1:"🇧🇪 Belgique",        eq2:"🇸🇳 Sénégal" },
-    83: { eq1:"🇵🇹 Portugal",        eq2:"🇭🇷 Croatie" },
-    84: { eq1:"🇪🇸 Espagne",         eq2:"🇦🇹 Autriche" },
-    85: { eq1:"🇨🇭 Suisse",          eq2:"🇩🇿 Algérie" },
-    86: { eq1:"🇦🇷 Argentine",       eq2:"🇨🇻 Cap-Vert" },
-    87: { eq1:"🇨🇴 Colombie",        eq2:"🇬🇭 Ghana" },
-    88: { eq1:"🇦🇺 Australie",       eq2:"🇪🇬 Égypte" },
+    73: {
+      r: "R32-1",
+      eq1: "🇿🇦 Afrique du Sud",
+      eq2: "🇨🇦 Canada"
+    },
+    74: {
+      r: "R32-3",
+      eq1: "🇩🇪 Allemagne",
+      eq2: "🇵🇾 Paraguay"
+    },
+    75: {
+      r: "R32-4",
+      eq1: "🇳🇱 Pays-Bas",
+      eq2: "🇲🇦 Maroc"
+    },
+    76: {
+      r: "R32-2",
+      eq1: "🇧🇷 Brésil",
+      eq2: "🇯🇵 Japon"
+    },
+    77: {
+      r: "R32-6",
+      eq1: "🇫🇷 France",
+      eq2: "🇸🇪 Suède"
+    },
+    78: {
+      r: "R32-5",
+      eq1: "🇨🇮 Côte d'Ivoire",
+      eq2: "🇳🇴 Norvège"
+    },
+    79: {
+      r: "R32-7",
+      eq1: "🇲🇽 Mexique",
+      eq2: "🇪🇨 Équateur"
+    },
+    80: {
+      r: "R32-8",
+      eq1: "🏴 Angleterre",
+      eq2: "🇨🇩 RD Congo"
+    },
+    81: {
+      r: "R32-10",
+      eq1: "🇺🇸 États-Unis",
+      eq2: "🇧🇦 Bosnie-Herzégovine"
+    },
+    82: {
+      r: "R32-9",
+      eq1: "🇧🇪 Belgique",
+      eq2: "🇸🇳 Sénégal"
+    },
+    83: {
+      r: "R32-16",
+      eq1: "🇵🇹 Portugal",
+      eq2: "🇭🇷 Croatie"
+    },
+    84: {
+      r: "R32-11",
+      eq1: "🇪🇸 Espagne",
+      eq2: "🇦🇹 Autriche"
+    },
+    85: {
+      r: "R32-13",
+      eq1: "🇨🇭 Suisse",
+      eq2: "🇩🇿 Algérie"
+    },
+    86: {
+      r: "R32-15",
+      eq1: "🇦🇷 Argentine",
+      eq2: "🇨🇻 Cap-Vert"
+    },
+    87: {
+      r: "R32-12",
+      eq1: "🇨🇴 Colombie",
+      eq2: "🇬🇭 Ghana"
+    },
+    88: {
+      r: "R32-14",
+      eq1: "🇦🇺 Australie",
+      eq2: "🇪🇬 Égypte"
+    }
   };
-  // Mapping numéro FIFA → ID appli pour les R32
-  var R32_APP = {73:"R32-1",74:"R32-3",75:"R32-4",76:"R32-2",77:"R32-6",78:"R32-5",
-                 79:"R32-7",80:"R32-8",81:"R32-10",82:"R32-9",83:"R32-16",84:"R32-11",
-                 85:"R32-13",86:"R32-15",87:"R32-12",88:"R32-14"};
-  // Équipes R16/QF/SF lues directement depuis allBracket
-  // GAUCHE : M89,M90,M93,M94 → R16-M89,R16-M90,R16-M93,R16-M94
-  // DROITE : M91,M92,M95,M96 → R16-M91,R16-M92,R16-M95,R16-M96
-  var L16_DATA = [
-    {id:"R16-M89", eq1:eq1of("R16-M89"), eq2:eq2of("R16-M89")},
-    {id:"R16-M90", eq1:eq1of("R16-M90"), eq2:eq2of("R16-M90")},
-    {id:"R16-M93", eq1:eq1of("R16-M93"), eq2:eq2of("R16-M93")},
-    {id:"R16-M94", eq1:eq1of("R16-M94"), eq2:eq2of("R16-M94")},
-  ];
-  var R16_DATA = [
-    {id:"R16-M91", eq1:eq1of("R16-M91"), eq2:eq2of("R16-M91")},
-    {id:"R16-M92", eq1:eq1of("R16-M92"), eq2:eq2of("R16-M92")},
-    {id:"R16-M95", eq1:eq1of("R16-M95"), eq2:eq2of("R16-M95")},
-    {id:"R16-M96", eq1:eq1of("R16-M96"), eq2:eq2of("R16-M96")},
-  ];
-  var LQF_DATA = [
-    {id:"QF-M97",  eq1:eq1of("QF-M97"),  eq2:eq2of("QF-M97")},
-    {id:"QF-M98",  eq1:eq1of("QF-M98"),  eq2:eq2of("QF-M98")},
-  ];
-  var RQF_DATA = [
-    {id:"QF-M99",  eq1:eq1of("QF-M99"),  eq2:eq2of("QF-M99")},
-    {id:"QF-M100", eq1:eq1of("QF-M100"), eq2:eq2of("QF-M100")},
-  ];
-  var SF1_DATA = {id:"SF-M101", eq1:eq1of("SF-M101"), eq2:eq2of("SF-M101")};
-  var SF2_DATA = {id:"SF-M102", eq1:eq1of("SF-M102"), eq2:eq2of("SF-M102")};
-  var FIN_eq1 = eq1of("FIN"), FIN_eq2 = eq2of("FIN");
-  var P3_eq1  = eq1of("3PL"), P3_eq2  = eq2of("3PL");
+
+  // Ordre visuel gauche (haut→bas) et droit
+  // GAUCHE→SF-M101 : M74,M77,M73,M75,M83,M84,M81,M82
+  var LO = [74, 77, 73, 75, 83, 84, 81, 82];
+  // DROITE→SF-M102 : M76,M78,M79,M80,M86,M88,M85,M87
+  var RO = [76, 78, 79, 80, 86, 88, 85, 87];
+
+  // R16 gauche : M89=pos0+1, M90=pos2+3, M93=pos4+5, M94=pos6+7
+  var L16 = ["R16-M89", "R16-M90", "R16-M93", "R16-M94"];
+  // R16 droit  : M91=pos0+1, M92=pos2+3, M95=pos4+5, M96=pos6+7
+  var R16 = ["R16-M91", "R16-M92", "R16-M95", "R16-M96"];
+  var LQF = ["QF-M97", "QF-M98"];
+  var RQF = ["QF-M99", "QF-M100"];
 
   // ── Dimensions SVG ──────────────────────────────────────────────────────────
   var CW = 150,
@@ -1713,15 +1744,13 @@ function BracketTab(props) {
     fin: "#c0b037",
     p3: "#27ae60"
   };
-  function trim(s) {
-    return s && s.length > 17 ? s.slice(0, 16) + "…" : s || "À déterm.";
+  function trim(s, n) {
+    return s && s.length > (n || 17) ? s.slice(0, n || 16) + "…" : s || "À déterm.";
   }
-
-  // Composants SVG
-  function Card(fifaId, side, eq, x, y, color) {
-    var s = sc(fifaId);
-    var sc_val = side === 1 ? s.g1 : s.g2;
-    var won = isWin(fifaId, side);
+  function Card(id, side, eq, x, y, color) {
+    var s = sc(id);
+    var sv = side === 1 ? s.g1 : s.g2;
+    var won = isWin(id, side);
     var isPH = !eq || eq.startsWith("3e") || eq === "À déterm.";
     var hasScore = s.g1 !== '' && s.g2 !== '';
     return React.createElement("g", null, React.createElement("rect", {
@@ -1749,14 +1778,14 @@ function BracketTab(props) {
       textAnchor: "middle",
       fill: won ? color : "#6b7280",
       fontFamily: "Segoe UI,system-ui,sans-serif"
-    }, sc_val));
+    }, sv));
   }
-  function Match(fifaId, eq1, eq2, x, yc, color) {
+  function Match(id, e1, e2, x, yc, color) {
     var y1 = yc - CH - GAP / 2,
       y2 = yc + GAP / 2;
     return React.createElement("g", {
-      key: fifaId
-    }, Card(fifaId, 1, eq1, x, y1, color), Card(fifaId, 2, eq2, x, y2, color), React.createElement("line", {
+      key: id
+    }, Card(id, 1, e1, x, y1, color), Card(id, 2, e2, x, y2, color), React.createElement("line", {
       x1: x + 4,
       y1: yc,
       x2: x + CW - 4,
@@ -1775,92 +1804,86 @@ function BracketTab(props) {
       strokeWidth: 1.5
     });
   }
-  function Lbl(key, x, y, txt, color) {
-    return React.createElement("text", {
-      key: key,
-      x: x,
-      y: y,
-      textAnchor: "middle",
-      fontSize: 8,
-      fontWeight: 700,
-      fill: color,
-      fontFamily: "Segoe UI,system-ui,sans-serif",
-      letterSpacing: 1
-    }, txt);
-  }
-
-  // Ordre gauche: M74,M77,M73,M75,M76,M78,M79,M80
-  // CÔTÉ GAUCHE → SF M101 (14 juil) : All/Par, Fra/Suè, AfSud/Can, PB/Mar, Por/Cro, Esp/Aut, USA/Bos, Bel/Sén
-  var LO = [74, 77, 73, 75, 83, 84, 81, 82];
-  // CÔTÉ DROIT → SF M102 (15 juil) : Bré/Jap, CdI/Nor, Mex/Éq, Ang/RDC, Arg/CV, Égy/Aus, Sui/Alg, Col/Gha
-  var RO = [76, 78, 79, 80, 86, 88, 85, 87];
-  // Connexions R32→R16 droit : pos0+1→R16[0](M91), pos2+3→R16[1](M92), pos4+5→R16[2](M95), pos6+7→R16[3](M96)
-  var DR_CONN = [[0,0],[1,0],[2,1],[3,1],[4,2],[5,2],[6,3],[7,3]];
-
-  // IDs R16 gauche/droite pour les matchs (pour score)
-  var L16_IDS = ["R16-M89", "R16-M90", "R16-M93", "R16-M94"];
-  var R16_IDS = ["R16-M91", "R16-M92", "R16-M95", "R16-M96"];
-  var LQF_IDS = ["QF-M97", "QF-M98"];
-  var RQF_IDS = ["QF-M99", "QF-M100"];
   var els = [];
 
-  // R32 GAUCHE
+  // ── R32 GAUCHE ──
   LO.forEach(function (n, i) {
-    els.push(Match(R32_APP[n], ML[n].eq1, ML[n].eq2, xL0, yR32(i), TC.r32));
-    els.push(React.createElement("text", {
-      key: "ll" + n,
-      x: xL0 + CW + 2,
-      y: yR32(i) - 1,
-      fontSize: 7,
-      fill: TC.r32 + "88",
-      fontFamily: "Segoe UI,system-ui,sans-serif",
-      fontWeight: 700
-    }, "M" + n));
-  });
-  // Conn R32→R16 gauche: paires 0+1→L16[0], 2+3→L16[1], 4+5→L16[2], 6+7→L16[3]
-  LO.forEach(function (_, i) {
+    var m = ML[n];
+    els.push(Match(m.r, m.eq1, m.eq2, xL0, yR32(i), TC.r32));
     els.push(Conn("cl32-" + i, xL0 + CW, yR32(i), xL1, yL16(Math.floor(i / 2)), TC.r32));
   });
 
-  // R16 GAUCHE
-  var l16eqs = [{
-    eq1: r16[89].eq1,
-    eq2: r16[89].eq2
-  }, {
-    eq1: r16[90].eq1,
-    eq2: r16[90].eq2
-  }, {
-    eq1: r16[91].eq1,
-    eq2: r16[91].eq2
-  }, {
-    eq1: r16[92].eq1,
-    eq2: r16[92].eq2
-  }];
-  L16_IDS.forEach(function (id, i) {
-    els.push(Match(id, l16eqs[i].eq1 || "À déterm.", l16eqs[i].eq2 || "À déterm.", xL1, yL16(i), TC.r16));
-    els.push(Conn("cl16-" + i + "a", xL1 + CW, yL16(i), xL2, yLqf(Math.floor(i / 2)), TC.r16));
+  // ── R16 GAUCHE avec accolades ──
+  var xBL16 = xL1 - 14;
+  L16.forEach(function (id, i) {
+    var e1 = eq1(id),
+      e2 = eq2(id);
+    els.push(Match(id, e1 || "À déterm.", e2 || "À déterm.", xL1, yL16(i), TC.r16));
+    // accolade droite vers QF
+    els.push(React.createElement("line", {
+      key: "bl16h-" + i,
+      x1: xL1 + CW,
+      y1: yL16(i),
+      x2: xL1 + CW + 12,
+      y2: yL16(i),
+      stroke: TC.r16 + "55",
+      strokeWidth: 1.5
+    }));
+    if (i % 2 === 0) {
+      els.push(React.createElement("line", {
+        key: "bl16v-" + i,
+        x1: xL1 + CW + 12,
+        y1: yL16(i),
+        x2: xL1 + CW + 12,
+        y2: yL16(i + 1),
+        stroke: TC.r16 + "55",
+        strokeWidth: 1.5
+      }));
+      els.push(Conn("cl16-" + i, xL1 + CW + 12, (yL16(i) + yL16(i + 1)) / 2, xL2, yLqf(Math.floor(i / 2)), TC.r16));
+    }
   });
 
-  // QF GAUCHE
-  var lqfeqs = [{
-    eq1: qf[97].eq1,
-    eq2: qf[97].eq2
-  }, {
-    eq1: qf[98].eq1,
-    eq2: qf[98].eq2
-  }];
-  LQF_IDS.forEach(function (id, i) {
-    els.push(Match(id, lqfeqs[i].eq1 || "À déterm.", lqfeqs[i].eq2 || "À déterm.", xL2, yLqf(i), TC.qf));
-    els.push(Conn("clqf-" + i, xL2 + CW, yLqf(i), xL3, yLsf(), TC.qf));
+  // ── QF GAUCHE avec accolades ──
+  LQF.forEach(function (id, i) {
+    var e1 = eq1(id),
+      e2 = eq2(id);
+    els.push(Match(id, e1 || "À déterm.", e2 || "À déterm.", xL2, yLqf(i), TC.qf));
+    els.push(React.createElement("line", {
+      key: "blqfh-" + i,
+      x1: xL2 + CW,
+      y1: yLqf(i),
+      x2: xL2 + CW + 12,
+      y2: yLqf(i),
+      stroke: TC.qf + "55",
+      strokeWidth: 1.5
+    }));
+    if (i === 0) {
+      els.push(React.createElement("line", {
+        key: "blqfv",
+        x1: xL2 + CW + 12,
+        y1: yLqf(0),
+        x2: xL2 + CW + 12,
+        y2: yLqf(1),
+        stroke: TC.qf + "55",
+        strokeWidth: 1.5
+      }));
+      els.push(Conn("clqf", xL2 + CW + 12, yLsf(), xL3, yLsf(), TC.qf));
+    }
   });
 
-  // SF GAUCHE
-  els.push(Match("SF-M101", sf["SF-M101"].eq1 || "À déterm.", sf["SF-M101"].eq2 || "À déterm.", xL3, yLsf(), TC.sf));
+  // ── SF GAUCHE ──
+  var sf1e1 = eq1("SF-M101"),
+    sf1e2 = eq2("SF-M101");
+  els.push(Match("SF-M101", sf1e1 || "À déterm.", sf1e2 || "À déterm.", xL3, yLsf(), TC.sf));
   els.push(Conn("clsf", xL3 + CW, yLsf(), xFIN, yFIN - CH - GAP / 2, TC.sf));
 
-  // FINALE centre
-  var finS = sc("FIN");
-  var hasFinScore = finS.g1 !== '' && finS.g2 !== '';
+  // ── FINALE ──
+  var finS = sc("FIN"),
+    hasFin = finS.g1 !== '' && finS.g2 !== '';
+  var FIN1 = eq1("FIN"),
+    FIN2 = eq2("FIN"),
+    P3A = eq1("3PL"),
+    P3B = eq2("3PL");
   els.push(React.createElement("rect", {
     key: "fin-bg",
     x: xFIN - 2,
@@ -1908,12 +1931,12 @@ function BracketTab(props) {
     x: xFIN + 6,
     y: yFIN - 16 + CH / 2 + 4,
     fontSize: 9.5,
-    fill: FIN_eq1 ? isWin("FIN", 1) ? "#fff" : "#c8d0e0" : "#3a4a5a",
+    fill: FIN1 ? isWin("FIN", 1) ? "#fff" : "#c8d0e0" : "#3a4a5a",
     fontWeight: isWin("FIN", 1) ? 800 : 400,
     fontFamily: "Segoe UI,system-ui,sans-serif",
-    fontStyle: FIN_eq1 ? "normal" : "italic"
-  }, trim(FIN_eq1)));
-  hasFinScore && els.push(React.createElement("text", {
+    fontStyle: FIN1 ? "normal" : "italic"
+  }, trim(FIN1 || "À déterm.")));
+  hasFin && els.push(React.createElement("text", {
     key: "fin-s1",
     x: xFIN + CW - 14,
     y: yFIN - 16 + CH / 2 + 4,
@@ -1948,12 +1971,12 @@ function BracketTab(props) {
     x: xFIN + 6,
     y: yFIN + GAP / 2 + CH / 2 + 4,
     fontSize: 9.5,
-    fill: FIN_eq2 ? isWin("FIN", 2) ? "#fff" : "#c8d0e0" : "#3a4a5a",
+    fill: FIN2 ? isWin("FIN", 2) ? "#fff" : "#c8d0e0" : "#3a4a5a",
     fontWeight: isWin("FIN", 2) ? 800 : 400,
     fontFamily: "Segoe UI,system-ui,sans-serif",
-    fontStyle: FIN_eq2 ? "normal" : "italic"
-  }, trim(FIN_eq2)));
-  hasFinScore && els.push(React.createElement("text", {
+    fontStyle: FIN2 ? "normal" : "italic"
+  }, trim(FIN2 || "À déterm.")));
+  hasFin && els.push(React.createElement("text", {
     key: "fin-s2",
     x: xFIN + CW - 14,
     y: yFIN + GAP / 2 + CH / 2 + 4,
@@ -1963,7 +1986,6 @@ function BracketTab(props) {
     fill: isWin("FIN", 2) ? "#c0b037" : "#6b7280",
     fontFamily: "Segoe UI,system-ui,sans-serif"
   }, finS.g2));
-
   // Petite finale
   els.push(React.createElement("text", {
     key: "p3-t",
@@ -1991,10 +2013,10 @@ function BracketTab(props) {
     x: xFIN + 6,
     y: yFIN + 92 + CH / 2 + 4,
     fontSize: 9,
-    fill: P3_eq1 ? "#c8d0e0" : "#3a4a5a",
+    fill: P3A ? "#c8d0e0" : "#3a4a5a",
     fontFamily: "Segoe UI,system-ui,sans-serif",
-    fontStyle: P3_eq1 ? "normal" : "italic"
-  }, trim(P3_eq1 || "Perd. M101")));
+    fontStyle: P3A ? "normal" : "italic"
+  }, trim(P3A || "Perd. SF-M101")));
   els.push(React.createElement("rect", {
     key: "p3-r2",
     x: xFIN,
@@ -2011,80 +2033,116 @@ function BracketTab(props) {
     x: xFIN + 6,
     y: yFIN + 92 + CH + 4 + CH / 2 + 4,
     fontSize: 9,
-    fill: P3_eq2 ? "#c8d0e0" : "#3a4a5a",
+    fill: P3B ? "#c8d0e0" : "#3a4a5a",
     fontFamily: "Segoe UI,system-ui,sans-serif",
-    fontStyle: P3_eq2 ? "normal" : "italic"
-  }, trim(P3_eq2 || "Perd. M102")));
+    fontStyle: P3B ? "normal" : "italic"
+  }, trim(P3B || "Perd. SF-M102")));
 
-  // SF DROITE avec accolade vers la finale
-  var xBraceSFR = xR3 - 16;
-  els.push(React.createElement("line",{key:"brsfrl",x1:xR3,y1:yRsf(),x2:xBraceSFR,y2:yRsf(),stroke:TC.sf+"55",strokeWidth:1.5}));
-  els.push(Conn("crsf", xBraceSFR, yRsf(), xFIN + CW, yFIN, TC.sf));
-  els.push(Match("SF-M102", sf["SF-M102"].eq1 || "À déterm.", sf["SF-M102"].eq2 || "À déterm.", xR3, yRsf(), TC.sf));
+  // ── SF DROITE ──
+  var sf2e1 = eq1("SF-M102"),
+    sf2e2 = eq2("SF-M102");
+  els.push(Conn("crsf", xR3 + CW, yRsf(), xFIN + CW, yFIN, TC.sf));
+  els.push(Match("SF-M102", sf2e1 || "À déterm.", sf2e2 || "À déterm.", xR3, yRsf(), TC.sf));
 
-  // QF DROITE avec accolades symétriques
-  var rqfeqs = [{eq1:qf["QF-M99"].eq1,eq2:qf["QF-M99"].eq2},{eq1:qf["QF-M100"].eq1,eq2:qf["QF-M100"].eq2}];
-  var xBraceQFR = xR2 - 16;
-  RQF_DATA.forEach(function(m, i) {
-    els.push(Match(m.id, m.eq1||"À déterm.", m.eq2||"À déterm.", xR2, yRqf(i), TC.qf));
-    // Accolade gauche QF droit
-    els.push(React.createElement("line",{key:"brqfl-"+i,x1:xR2,y1:yRqf(i),x2:xBraceQFR,y2:yRqf(i),stroke:TC.qf+"55",strokeWidth:1.5}));
-    if(i===0){
-      els.push(React.createElement("line",{key:"brqfv",x1:xBraceQFR,y1:yRqf(0),x2:xBraceQFR,y2:yRqf(1),stroke:TC.qf+"55",strokeWidth:1.5}));
-      els.push(Conn("crqf-mid",xBraceQFR,yRsf(),xR3+CW,yRsf(),TC.qf));
-    }
-  });
-
-  // R16 DROITE avec accolades symétriques (M91,M92,M95,M96)
-  var r16eqs = [{eq1:r16["R16-M91"].eq1,eq2:r16["R16-M91"].eq2},{eq1:r16["R16-M92"].eq1,eq2:r16["R16-M92"].eq2},{eq1:r16["R16-M95"].eq1,eq2:r16["R16-M95"].eq2},{eq1:r16["R16-M96"].eq1,eq2:r16["R16-M96"].eq2}];
-  var xBraceR16 = xR1 - 16;
-  R16_DATA.forEach(function(m, i) {
-    els.push(Match(m.id, m.eq1||"À déterm.", m.eq2||"À déterm.", xR1, yR16(i), TC.r16));
-    // Accolade gauche R16 droit
-    els.push(React.createElement("line",{key:"br16l-"+i,x1:xR1,y1:yR16(i),x2:xBraceR16,y2:yR16(i),stroke:TC.r16+"55",strokeWidth:1.5}));
-    if(i%2===0){
-      els.push(React.createElement("line",{key:"br16v-"+i,x1:xBraceR16,y1:yR16(i),x2:xBraceR16,y2:yR16(i+1),stroke:TC.r16+"55",strokeWidth:1.5}));
-      els.push(Conn("cr16-"+i,xBraceR16,yRqf(Math.floor(i/2)),xR2+CW,yRqf(Math.floor(i/2)),TC.r16));
-    }
-  });
-
-  // R32 DROITE avec accolades symétriques (connexions depuis bord GAUCHE des cartes)
-  RO.forEach(function (n, i) {
-    els.push(Match(R32_APP[n], ML[n].eq1, ML[n].eq2, xR0, yR32(i), TC.r32));
-  });
-  // Accolades côté droit : chaque paire converge vers un point central AVANT la carte R16
-  // Le point de convergence est à mi-chemin entre xR1+CW et xR0, côté gauche de xR0
-  var xBraceR = xR0 - 16; // point d'accolade à gauche des cartes R32 droit
-  DR_CONN.forEach(function (pair, i) {
-    var r32idx = pair[0];
-    var r16idx = pair[1];
-    var yMid = yR16(r16idx); // point central = centre du R16 correspondant
-    // Ligne horizontale depuis le bord gauche de la carte R32 jusqu'au point d'accolade
+  // ── QF DROITE avec accolades ──
+  RQF.forEach(function (id, i) {
+    var e1 = eq1(id),
+      e2 = eq2(id);
+    els.push(Match(id, e1 || "À déterm.", e2 || "À déterm.", xR2, yRqf(i), TC.qf));
     els.push(React.createElement("line", {
-      key: "brl-" + i,
-      x1: xR0, y1: yR32(r32idx),
-      x2: xBraceR, y2: yR32(r32idx),
-      stroke: TC.r32 + "55", strokeWidth: 1.5
+      key: "brqfh-" + i,
+      x1: xR2,
+      y1: yRqf(i),
+      x2: xR2 - 12,
+      y2: yRqf(i),
+      stroke: TC.qf + "55",
+      strokeWidth: 1.5
     }));
-    // Ligne verticale d'accolade entre les deux matchs d'une paire (seulement pour le premier de la paire)
-    if (r32idx % 2 === 0) {
+    if (i === 0) {
       els.push(React.createElement("line", {
-        key: "brv-" + r16idx,
-        x1: xBraceR, y1: yR32(r32idx),
-        x2: xBraceR, y2: yR32(r32idx + 1),
-        stroke: TC.r32 + "55", strokeWidth: 1.5
+        key: "brqfv",
+        x1: xR2 - 12,
+        y1: yRqf(0),
+        x2: xR2 - 12,
+        y2: yRqf(1),
+        stroke: TC.qf + "55",
+        strokeWidth: 1.5
       }));
+      els.push(Conn("crqf", xR2 - 12, yRsf(), xR3 + CW, yRsf(), TC.qf));
     }
-    // Courbe depuis le point central de l'accolade vers la carte R16
-    if (r32idx % 2 === 0) {
-      els.push(Conn("cr32-" + i, xBraceR, yMid, xR1 + CW, yMid, TC.r32));
+  });
+
+  // ── R16 DROITE avec accolades ──
+  R16.forEach(function (id, i) {
+    var e1 = eq1(id),
+      e2 = eq2(id);
+    els.push(Match(id, e1 || "À déterm.", e2 || "À déterm.", xR1, yR16(i), TC.r16));
+    els.push(React.createElement("line", {
+      key: "br16h-" + i,
+      x1: xR1,
+      y1: yR16(i),
+      x2: xR1 - 12,
+      y2: yR16(i),
+      stroke: TC.r16 + "55",
+      strokeWidth: 1.5
+    }));
+    if (i % 2 === 0) {
+      els.push(React.createElement("line", {
+        key: "br16v-" + i,
+        x1: xR1 - 12,
+        y1: yR16(i),
+        x2: xR1 - 12,
+        y2: yR16(i + 1),
+        stroke: TC.r16 + "55",
+        strokeWidth: 1.5
+      }));
+      els.push(Conn("cr16-" + i, xR1 - 12, (yR16(i) + yR16(i + 1)) / 2, xR2 + CW, yRqf(Math.floor(i / 2)), TC.r16));
+    }
+  });
+
+  // ── R32 DROITE ──
+  // Connexions : pos0+1→R16[0], pos2+3→R16[1], pos4+5→R16[2], pos6+7→R16[3]
+  RO.forEach(function (n, i) {
+    var m = ML[n];
+    els.push(Match(m.r, m.eq1, m.eq2, xR0, yR32(i), TC.r32));
+    // Accolade gauche
+    els.push(React.createElement("line", {
+      key: "br32h-" + i,
+      x1: xR0,
+      y1: yR32(i),
+      x2: xR0 - 12,
+      y2: yR32(i),
+      stroke: TC.r32 + "55",
+      strokeWidth: 1.5
+    }));
+    if (i % 2 === 0) {
+      els.push(React.createElement("line", {
+        key: "br32v-" + i,
+        x1: xR0 - 12,
+        y1: yR32(i),
+        x2: xR0 - 12,
+        y2: yR32(i + 1),
+        stroke: TC.r32 + "55",
+        strokeWidth: 1.5
+      }));
+      els.push(Conn("cr32-" + i, xR0 - 12, (yR32(i) + yR32(i + 1)) / 2, xR1 + CW, yR16(Math.floor(i / 2)), TC.r32));
     }
   });
 
   // Légendes colonnes
   var cols = [[xL0 + CW / 2, "1/16", TC.r32], [xL1 + CW / 2, "1/8", TC.r16], [xL2 + CW / 2, "1/4", TC.qf], [xL3 + CW / 2, "1/2", TC.sf], [xFIN + CW / 2, "FIN", TC.fin], [xR3 + CW / 2, "1/2", TC.sf], [xR2 + CW / 2, "1/4", TC.qf], [xR1 + CW / 2, "1/8", TC.r16], [xR0 + CW / 2, "1/16", TC.r32]];
   cols.forEach(function (c, i) {
-    els.push(Lbl("lbcol-" + i, c[0], SVG_H - 8, c[1], c[2]));
+    els.push(React.createElement("text", {
+      key: "lbcol-" + i,
+      x: c[0],
+      y: SVG_H - 8,
+      textAnchor: "middle",
+      fontSize: 8,
+      fontWeight: 700,
+      fill: c[2],
+      fontFamily: "Segoe UI,system-ui,sans-serif",
+      letterSpacing: 1
+    }, c[1]));
   });
   return React.createElement("div", {
     style: {
@@ -2111,7 +2169,7 @@ function BracketTab(props) {
       marginTop: 4,
       lineHeight: 1.6
     }
-  }, "🇩🇪 All. vs 🇫🇷 Fra. possibles en 1/8 (M89) · 🇫🇷 Fra. et 🇳🇴 Nor. au plus tôt en demi-finale (M101)")), React.createElement("svg", {
+  }, "🇩🇪 All. vs 🇫🇷 Fra. possibles en 1/8 · 🇫🇷 Fra. et 🇳🇴 Nor. au plus tôt en demi-finale")), React.createElement("svg", {
     width: SVG_W,
     height: SVG_H,
     style: {
@@ -2121,6 +2179,8 @@ function BracketTab(props) {
     viewBox: "0 0 " + SVG_W + " " + SVG_H
   }, els));
 }
+
+
 
 
 
